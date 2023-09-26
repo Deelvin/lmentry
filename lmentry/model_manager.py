@@ -8,7 +8,7 @@ from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoTokeni
 from lmentry.constants import paper_models, hf_models, hf_11b_models
 
 
-def get_type_config(model_name: str, device: str="cuda", name_from_mlc_config: bool=False):
+def get_type_config(model_name: str, device: str="cuda"):
   type=""
   config={}
   if model_name in paper_models.keys():
@@ -22,7 +22,6 @@ def get_type_config(model_name: str, device: str="cuda", name_from_mlc_config: b
   elif Path(model_name).is_dir():
     type = "mlc"
     model_root = Path(model_name)
-
     mlc_config_file = model_root.joinpath("params/mlc-chat-config.json")
 
     mlc_config = {}
@@ -30,11 +29,7 @@ def get_type_config(model_name: str, device: str="cuda", name_from_mlc_config: b
       mlc_config = json.load(json_file)
 
     model_local_id = mlc_config["local_id"]
-    if name_from_mlc_config:
-      config_model_name = model_local_id
-    else:
-      config_model_name = str(model_root).split("/")[-1]
-    config_model_name = config_model_name.replace(".", "-")
+    config_model_name = model_local_id.replace(".", "-")
 
     config ={
       "model_name": config_model_name,
@@ -53,16 +48,6 @@ def get_type_config(model_name: str, device: str="cuda", name_from_mlc_config: b
   config["predictor_name"] = config.get("predictor_name", model_name)
 
   return type, config
-
-
-def get_short_model_names(model_names):
-  short_model_names =[]
-  for model_name in model_names:
-    _, model_config = get_type_config(model_name)
-    short_model_names.append(model_config["short_name"])
-
-  return short_model_names
-
 
 class ModelManager:
   def __init__(self, model_name: str, device: str="cuda"):
@@ -87,35 +72,24 @@ class ModelManager:
           # 50277 means "### End"
           self.tokenizer.eos_token_id = 50277
 
+    logging.info(f"loading model {self.predictor_name}")
+    if self.type == "paper":
+      self.model = AutoModelForSeq2SeqLM.from_pretrained(self.predictor_name)
+    elif self.type == "hf":
+      self.model = AutoModelForCausalLM.from_pretrained(self.predictor_name, low_cpu_mem_usage=True, torch_dtype=torch.float16)
+    elif self.type == "mlc":
+      from lmentry.relax_model_wrapper import get_relax_model
+      self.model = get_relax_model(self.config, self.tokenizer.eos_token_id)
+    logging.info(f"finished loading model {self.predictor_name}")
+
     self.device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
-    self.model = None
-    self.is_init = False
-
-  def init_model(self):
-    if not self.is_init:
-      logging.info(f"Initializing model {self.predictor_name}")
-      if self.type == "paper":
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(self.predictor_name)
-      elif self.type == "hf":
-        self.model = AutoModelForCausalLM.from_pretrained(self.predictor_name, low_cpu_mem_usage=True, torch_dtype=torch.float16)
-      elif self.type == "mlc":
-        from lmentry.relax_model_wrapper import get_relax_model
-        self.model = get_relax_model(self.config, self.tokenizer.eos_token_id)
-      logging.info(f"finished initializing model {self.predictor_name}")
-      self.is_init = True
-
-  def is_init(self):
-    return self.is_init
 
   def get_tokenizer(self):
     return self.tokenizer
 
   def to_device(self):
     if self.type != "mlc":
-      if self.is_init:
-        if self.model_name in hf_11b_models:  # 11B models have to be parallelized
-          self.model.parallelize()
-        else:
-          self.model.to(self.device)
+      if self.model_name in hf_11b_models:  # 11B models have to be parallelized
+        self.model.parallelize()
       else:
-        raise RuntimeError(f"Model {self.predictor_name} was not initialized!")
+        self.model.to(self.device)

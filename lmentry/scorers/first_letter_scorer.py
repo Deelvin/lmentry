@@ -18,7 +18,6 @@ class FirstLetterScorer(LMentryScorer):
             rf"{answer} is the first letter {of} {word}",
             rf"{word} {starts} with {answer}",
             rf"The letter that {word} {starts} with is {answer}",
-            rf"The letter {answer} {starts} with the word {word}",
             rf"{answer} is the starting letter {of} {word}",
             rf"{word}: {answer}",
             rf"First letter: {answer}",
@@ -38,7 +37,7 @@ class FirstLetterScorer(LMentryScorer):
 
         answer = the_letter_regex(answer)
 
-        score, certainty = self._simple_scorer(prediction, answer, False)
+        score, certainty = self._simple_scorer(prediction, answer)
         if score:
             return score, certainty
 

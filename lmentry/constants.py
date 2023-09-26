@@ -38,6 +38,14 @@ paper_models = {
 
 hf_models = {
     "vicuna-7b-v1-3": {"short_name": "vicuna-7b-v1-3", "paper_name": "Vicuna-7b", "predictor_name": "lmsys/vicuna-7b-v1.3"},
+# TODO(vchernov): workaround for mlc-models short names
+    "vicuna-7b-v1-3-q4f16_0": {"short_name": "vicuna-7b-v1-3-q4f16_0"},
+    "vicuna-7b-v1-3-q0f16": {"short_name": "vicuna-7b-v1-3-q0f16"},
+
+# FIXME && TODO: simialar workaroun for endpoint
+     "llama2-chat-70B-int4": {"short_name": "llama2-chat-70B-int4"},
+     "llama-2-7b": {"short_name": "llama-2-7b"},
+     
 }
 
 text_001_models = [

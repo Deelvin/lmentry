@@ -7,6 +7,8 @@ from pathlib import Path
 
 from num2words import num2words
 
+import concurrent.futures
+
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.INFO)
 
 
@@ -129,8 +131,64 @@ class LMentryScorer:
 
     def score_prediction(self, prediction, example, truncate_prediction: bool = False):
         raise NotImplementedError
+    
+    
+    
 
-    def score_predictions(self,
+
+    def score_predictions(self, 
+                          predictions_path: Path,
+                          task_data_path: Path,
+                          output_path: Path,
+                          truncate_predictions: bool = False,
+                          log_file_locations: bool = True,
+                          forced_scoring: bool = False,
+                          max_workers: int = 8):
+        # Load the predictions
+        if log_file_locations:
+            logging.info(f"Loading predictions from {predictions_path}")
+        with open(predictions_path) as f_predictions:
+            predictions = json.load(f_predictions)
+        if predictions.get("scoring", False) and not forced_scoring:
+            logging.info(f"Predictions at {output_path} have already been scored")
+            return
+
+        # Load task data
+        with open(task_data_path) as f_task_data:
+            task_data = json.load(f_task_data)
+        examples = task_data["examples"]
+
+        # Create a ThreadPoolExecutor
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Define a function to score predictions for a single id_
+            def score_single_prediction(id_):
+                if id_ != "scoring" and "prediction" in predictions[id_]:
+                    example = examples[id_]
+                    prediction_entry = predictions[id_]
+                    prediction = prediction_entry["prediction"]
+                    question = prediction_entry["input"]
+                    prediction = prediction.replace(question, "")
+                    while prediction.startswith(" "):
+                        prediction = prediction[1:]
+                    score, certainty = score_prediction(prediction, example, truncate_predictions)
+                    prediction_entry["score"] = score
+                    prediction_entry["certainty"] = certainty
+
+            # Submit tasks for each id_ and score predictions concurrently
+            futures = [executor.submit(score_single_prediction, id_) for id_ in predictions]
+
+            # Wait for all futures to complete
+            concurrent.futures.wait(futures)
+
+        # Save the scored predictions
+        predictions["scoring"] = True
+        with open(output_path, "w") as f_scored_predictions:
+            json.dump(predictions, f_scored_predictions, indent=2)
+        if log_file_locations:
+            logging.info(f"Saved scored predictions at {output_path}")
+
+
+    def score_predictions_old(self,
                           predictions_path: Path,
                           task_data_path: Path,
                           output_path: Path,
@@ -154,7 +212,8 @@ class LMentryScorer:
 
         # score predictions
         for id_ in predictions:
-            if id_ != "scoring":
+            #FIXME: quick fix to handle cases when prediction is not recieved
+            if id_ != "scoring" and "prediction" in predictions[id_]:
                 example = examples[id_]
                 prediction_entry = predictions[id_]
                 prediction = prediction_entry["prediction"]
