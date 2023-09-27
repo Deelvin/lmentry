@@ -10,6 +10,9 @@ from lmentry.tasks.lmentry_tasks import all_tasks
 from lmentry.constants import DEFAULT_MAX_LENGTH
 from runners.octoairunner import OctoAIRunner
 import uvicorn
+import os
+
+from dotenv import load_dotenv
     
 app = FastAPI()
 
@@ -23,7 +26,21 @@ app.add_middleware(
 
 runner = None
 
-db_storage = FirestoreClient("llmscompared-a250f-firebase-adminsdk-m58wx-fdddc31e2d.json")
+# Load environment variables from .env file
+load_dotenv()
+
+# Access the FIREBASE_DB_FILE environment variable
+firebase_db_file_relative = os.getenv("FIREBASE_DB_FILE")
+
+# Get the current working directory where the script is started
+current_directory = os.getcwd()
+
+# Join the relative path with the current directory
+firebase_db_file_absolute = os.path.join(current_directory, firebase_db_file_relative)
+
+# Update the db_storage variable
+db_storage = FirestoreClient(firebase_db_file_absolute)
+
 
 class PredictionRequest(BaseModel):
     model_name: str = "llama2-chat-70B-int4"

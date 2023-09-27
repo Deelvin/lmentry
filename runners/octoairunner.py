@@ -10,7 +10,7 @@ from pathlib import Path
 from lmentry.analysis.accuracy import create_per_task_accuracy_csv, create_per_template_accuracy_csv, flexible_scoring
 
 from runners.baserunner import BaseRunner  
-from runners.baserunner import OCTOAI_API_KEY
+
 
 from lmentry.tasks.lmentry_tasks import all_tasks
 import concurrent.futures
@@ -19,12 +19,20 @@ import time
 import uuid
 
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 class OctoAIRunner(BaseRunner):
     def __init__(self, model_name: str, task_names: List[str] = None, device: str = "cuda",
                  batch_size: int = 16, max_length: int = 256):
         super().__init__(model_name, task_names, device, batch_size, max_length)
         
-        self.key = OCTOAI_API_KEY
+        # Load the OCTOAI_API_KEY environment variable
+        self.key = os.getenv("OCTOAI_API_KEY")
+        
 
         # Calculate the total number of samples across all tasks
         self.total_tasks_to_process = self.calculate_total_samples()
