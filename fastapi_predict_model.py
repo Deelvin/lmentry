@@ -72,8 +72,8 @@ def generate_predictions_async(runner):
     #runner.generate_predictions()
     runner.uuid = "36c857bd-02fb-44de-b5c8-70e66513d756"
     #runner.score_predictions()   
-    runner.evaluate_predictions()
-    #db_storage.serialize_experiment(runner)
+    #runner.evaluate_predictions()
+    db_storage.serialize_experiment(runner)
 
     end_time = time.time()
     execution_time = end_time - start_time

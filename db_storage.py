@@ -37,7 +37,7 @@ class FirestoreClient:
     import csv
     import json
 
-    def parse_csv_and_calculate_average(self):
+    def parse_csv_and_calculate_average(self, uuid):
         # Initialize variables to store data and calculate average
         data = {}
         total_values = 0
@@ -50,7 +50,7 @@ class FirestoreClient:
         parent_directory = os.path.dirname(script_directory)
 
         # Construct the full path to the JSON file by concatenating with the "results" folder
-        csv_file_path = os.path.join(parent_directory, "results/accuracy_per_task.csv")
+        csv_file_path = os.path.join(parent_directory, f"results/accuracy_per_task_{uuid}.csv")
 
         # Read the CSV file and parse its contents
         with open(csv_file_path, mode='r') as file:
@@ -137,7 +137,7 @@ class FirestoreClient:
         if not self.db:
             raise ValueError("Firestore database not initialized.")
 
-        results_data = self.parse_csv_and_calculate_average()
+        results_data = self.parse_csv_and_calculate_average(runner.get_uuid())
 
         # Define the Firestore collection name where you want to store the experiment data
         collection_name = "experiments"
