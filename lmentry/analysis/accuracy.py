@@ -220,8 +220,12 @@ def create_per_task_accuracy_csv(task_names: list[str] = None, model_names: list
                 row.append(accuracy)
 
         rows.append(row)
+        
+    unique_filename = "accuracy_per_task.csv" 
+    if (uuid != ""): 
+            unique_filename = f"accuracy_per_task_{uuid}.csv"
 
-    output_path = output_path or RESULTS_DIR.joinpath("accuracy_per_task.csv")
+    output_path = output_path or RESULTS_DIR.joinpath(unique_filename)
     with open(output_path, "w", newline="") as f_output:
         writer = csv.writer(f_output)
         writer.writerows(rows)
@@ -261,7 +265,11 @@ def create_per_template_accuracy_csv(task_names: list[str] = None, model_names: 
 
         rows.append(row)
 
-    output_path = output_path or RESULTS_DIR.joinpath("accuracy_per_template.csv")
+    unique_filename = "accuracy_per_template.csv" 
+    if (uuid != ""): 
+            unique_filename = f"accuracy_per_template_{uuid}.csv"
+
+    output_path = output_path or RESULTS_DIR.joinpath(unique_filename)
     with open(output_path, "w", newline="") as f_output:
         writer = csv.writer(f_output)
         writer.writerows(rows)
