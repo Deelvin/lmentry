@@ -132,11 +132,8 @@ class LMentryScorer:
     def score_prediction(self, prediction, example, truncate_prediction: bool = False):
         raise NotImplementedError
     
-    
-    
-
-
-    def score_predictions(self, 
+    # FIXME: does not work correctly 
+    def score_predictions_parallel(self, 
                           predictions_path: Path,
                           task_data_path: Path,
                           output_path: Path,
@@ -188,7 +185,7 @@ class LMentryScorer:
             logging.info(f"Saved scored predictions at {output_path}")
 
 
-    def score_predictions_old(self,
+    def score_predictions(self,
                           predictions_path: Path,
                           task_data_path: Path,
                           output_path: Path,

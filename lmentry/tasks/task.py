@@ -30,10 +30,14 @@ class LMentryTask:
         with open(task_data_path, "w") as f:
             json.dump(task_data, f, indent=2)
 
-    def score_predictions(self, model_name, forced_scoring: bool = False):
+    def score_predictions(self, model_name, forced_scoring: bool = False, uuid: str = ""):
         logging.info(f"starting to score {self.name} predictions for {model_name}")
+        
+        unique_filename = model_name 
+        if (uuid): 
+            unique_filename = unique_filename + "_" + uuid
 
-        predictions_path = self.predictions_dir.joinpath(f"{model_name}.json")
+        predictions_path = self.predictions_dir.joinpath(f"{unique_filename}.json")
         task_data_path = self.default_data_path
         output_path = predictions_path  # overwrite the predictions with the scored predictions
 

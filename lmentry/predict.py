@@ -111,6 +111,8 @@ def generate_all_octoai_predictions(task_names: list[str] = None, model_name: st
     # fixme: hardcoded
     model_name = "llama2-chat-70B-int4"
     model_name = "llama-2-7b"
+    
+    print("model name", model_name)
 
     for task_name in task_names:
         # check task and skip it if it has been done

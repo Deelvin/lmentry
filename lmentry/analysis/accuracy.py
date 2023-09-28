@@ -15,8 +15,13 @@ from lmentry.model_manager import get_type_config
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.INFO)
 
-def get_prediction(task_name: str, model_name: str):
-    prediction_path = PREDICTIONS_ROOT_DIR.joinpath(task_name).joinpath(f"{model_name}.json")
+def get_prediction(task_name: str, model_name: str, uuid: str = ""):
+    
+    unique_filename = model_name 
+    if (uuid): 
+            unique_filename = unique_filename + "_" + uuid
+    
+    prediction_path = PREDICTIONS_ROOT_DIR.joinpath(task_name).joinpath(f"{unique_filename}.json")
     if not prediction_path.exists():
         logging.warning(f"File {prediction_path} was not found therefore no results for task {task_name} with model {model_name}")
         return dict()
@@ -27,9 +32,9 @@ def get_prediction(task_name: str, model_name: str):
     return predictions
 
 
-def get_accuracy_and_certainty(task_name: str, model_name: str) -> dict:
+def get_accuracy_and_certainty(task_name: str, model_name: str, uuid: str = "") -> dict:
     # load scored predictions
-    predictions = get_prediction(task_name, model_name)
+    predictions = get_prediction(task_name, model_name, uuid)
 
     # load task data (for ids and templates)
     task_data_path = TASKS_DATA_DIR.joinpath(f"{task_name}.json")
@@ -189,7 +194,7 @@ def get_short_model_names(model_names):
 
 
 def create_per_task_accuracy_csv(task_names: list[str] = None, model_names: list[str] = None,
-                                 output_path: Path = None):
+                                 output_path: Path = None, uuid: str = ""):
     rows: list[list] = list()
 
     model_names = model_names or list(paper_models)
@@ -205,7 +210,7 @@ def create_per_task_accuracy_csv(task_names: list[str] = None, model_names: list
 
         # for each model, get the results for each task
         for model_name in model_names:
-            metrics = get_accuracy_and_certainty(task_name, model_name)
+            metrics = get_accuracy_and_certainty(task_name, model_name, uuid)
             if not metrics:
                 row.append("")
                 logging.warning(f"no results for task {task_name} with model {model_name}")
@@ -223,7 +228,7 @@ def create_per_task_accuracy_csv(task_names: list[str] = None, model_names: list
 
 
 def create_per_template_accuracy_csv(task_names: list[str] = None, model_names: list[str] = None,
-                                     output_path: Path = None):
+                                     output_path: Path = None, uuid: str = ""):
     rows: list[list] = list()
 
     model_names = model_names or list(paper_models)
@@ -244,7 +249,7 @@ def create_per_template_accuracy_csv(task_names: list[str] = None, model_names: 
 
         # for each model, get the results for each template
         for model_name in model_names:
-            metrics = get_accuracy_and_certainty(task_name, model_name)
+            metrics = get_accuracy_and_certainty(task_name, model_name, uuid=uuid)
             if not metrics:
                 row.extend([""] * 3)
                 logging.warning(f"no results for task {task_name} with model {model_name}")
@@ -262,10 +267,10 @@ def create_per_template_accuracy_csv(task_names: list[str] = None, model_names: 
         writer.writerows(rows)
 
 
-def score_task_predictions(task_name: str, model_name: str, forced_scoring: bool=False):
+def score_task_predictions(task_name: str, model_name: str, forced_scoring: bool=False, uuid: str=""):
 
     task = all_tasks[task_name]()
-    task.score_predictions(model_name, forced_scoring=forced_scoring)
+    task.score_predictions(model_name, forced_scoring=forced_scoring, uuid=uuid)
 
 
 '''
@@ -282,12 +287,12 @@ def score_all_predictions(task_names: list[str] = None, model_names: list[str] =
 '''        
         
 def score_all_predictions(task_names: list[str] = None, model_names: list[str] = None,
-                          num_processes: int = 1, forced_scoring: bool = False):
+                          num_processes: int = 1, forced_scoring: bool = False, uuid: str = ""):
 
     task_names = task_names or all_tasks.keys()
     model_names = model_names or list(paper_models)
 
-    starargs = itertools.product(task_names, model_names, [forced_scoring])
+    starargs = itertools.product(task_names, model_names, [forced_scoring], [uuid])
 
     for args in starargs:
         score_task_predictions(*args)  # Call score_task_predictions with the unpacked arguments
@@ -336,7 +341,7 @@ def look_through_predictions_dir(model_names: list[str] = None, task_names: list
 
 
 def flexible_scoring(task_names: list[str] = None, model_names: list[str] = None,
-                     num_processes: int = 1, forced_scoring: bool=False):
+                     num_processes: int = 1, forced_scoring: bool=False, uuid: str=""):
     if not TASKS_DATA_DIR.exists():
         logging.error(f"LMentry tasks data not found at {TASKS_DATA_DIR}. aborting.\n")
         return
@@ -344,16 +349,26 @@ def flexible_scoring(task_names: list[str] = None, model_names: list[str] = None
         logging.error(f"Predictions not found at {PREDICTIONS_ROOT_DIR}. aborting.\n")
         return
 
-    model_tasks_dict = look_through_predictions_dir(model_names=get_short_model_names(model_names),
-                                                    task_names=task_names)
+    if (uuid == ""):
+        model_tasks_dict = look_through_predictions_dir(model_names=get_short_model_names(model_names),
+                                                        task_names=task_names)
 
-    for model, tasks in model_tasks_dict.items():
-        logging.info(f"scoring LMentry predictions for {model}")
-        score_all_predictions(task_names=tasks,
-                              model_names=[model],
-                              num_processes=num_processes,
-                              forced_scoring=forced_scoring,)
-        logging.info(f"Scoring LMentry predictions for {model} finished")
+        for model, tasks in model_tasks_dict.items():
+            logging.info(f"scoring LMentry predictions for {model}")
+            score_all_predictions(task_names=tasks,
+                                model_names=[model],
+                                num_processes=num_processes,
+                                forced_scoring=forced_scoring)
+            logging.info(f"Scoring LMentry predictions for {model} finished")
+    
+    else:
+            logging.info(f"scoring LMentry predictions for {model_names[0]}")
+            score_all_predictions(task_names=task_names,
+                                model_names=model_names,
+                                num_processes=num_processes,
+                                forced_scoring=forced_scoring,
+                                uuid=uuid)
+            logging.info(f"Scoring LMentry predictions for {model_names[0]} finished")        
 
 
 def get_model_accuracy(model_name):
