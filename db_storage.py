@@ -1,8 +1,9 @@
 from cProfile import run
 import os
 import firebase_admin
-from firebase_admin import credentials, firestore, storage 
+from firebase_admin import credentials, firestore, storage
 
+from lmentry.constants import RESULTS_DIR
 
 from runners.baserunner import BaseRunner
 
@@ -50,7 +51,7 @@ class FirestoreClient:
         parent_directory = os.path.dirname(script_directory)
 
         # Construct the full path to the JSON file by concatenating with the "results" folder
-        csv_file_path = os.path.join(parent_directory, f"results/accuracy_per_task_{uuid}.csv")
+        csv_file_path =  RESULTS_DIR.joinpath(f"accuracy_per_task_{uuid}.csv")
 
         # Read the CSV file and parse its contents
         with open(csv_file_path, mode='r') as file:
@@ -154,6 +155,7 @@ class FirestoreClient:
             "performance": runner.tasks_per_second,
             "backend": "octoai.cloud",
             "max_length": runner.max_length,
+            "uuid": runner.get_uuid()
         }
 
         # Set the data in the Firestore document

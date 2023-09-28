@@ -32,8 +32,6 @@ load_dotenv()
 # Update the db_storage variable
 db_storage = FirestoreClient(os.getenv("FIREBASE_DB_FILE"))
 
-
-
 class PredictionRequest(BaseModel):
     model_name: str = "llama-2-70b-chat"
     task_names: List[str] = ["bigger_number","first_alphabetically","first_letter","most_associated_word","smaller_number"]
@@ -69,10 +67,9 @@ import time
 def generate_predictions_async(runner):
     start_time = time.time()  
     
-    #runner.generate_predictions()
-    runner.uuid = "36c857bd-02fb-44de-b5c8-70e66513d756"
-    #runner.score_predictions()   
-    #runner.evaluate_predictions()
+    runner.generate_predictions()
+    runner.score_predictions()   
+    runner.evaluate_predictions()
     db_storage.serialize_experiment(runner)
 
     end_time = time.time()
