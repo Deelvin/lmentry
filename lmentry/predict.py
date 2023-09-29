@@ -11,6 +11,7 @@ import openai
 
 from tasks.task_utils import all_tasks, get_task
 from lmentry.model_manager import ModelManager
+from lmentry.input_preprocessor import PromptPreprocessor
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.INFO)
 
@@ -71,7 +72,11 @@ def generate_task_hf_predictions(task_name_or_obj,
     examples = task.get_data(data_path)
     examples = get_part_from(examples, samples_num)
     # get the inputs from the task data
-    string_inputs = [example["input"] for example in examples.values()]
+    raw_input_prompts = [example["input"] for example in examples.values()]
+
+    # Preprocess input prompts if need
+    preprocessor = PromptPreprocessor()
+    preproc_input_prompts = preprocessor.preprocess(raw_input_prompts)
 
     # generate predictions
     predictions: list[str] = []
@@ -87,11 +92,11 @@ def generate_task_hf_predictions(task_name_or_obj,
                 max_tokens=100,
         )
     
-        for batch_of_strings in tqdm(_batcher(string_inputs, batch_size), desc="Predict batch of requests"):
+        for batch_of_strings in tqdm(_batcher(preproc_input_prompts, batch_size), desc="Predict batch of requests"):
             outputs = model.generate(batch_of_strings, sampling_params)
             predictions.extend(outputs)
     else:
-        for batch_of_strings in tqdm(_batcher(string_inputs, batch_size), desc="Predict batch of requests"):
+        for batch_of_strings in tqdm(_batcher(preproc_input_prompts, batch_size), desc="Predict batch of requests"):
             batched_encoding = tokenizer(batch_of_strings, padding="longest", return_tensors="pt")
             batched_encoding = batched_encoding.to(manager.device)
             tensor_inputs = batched_encoding["input_ids"]
@@ -102,7 +107,7 @@ def generate_task_hf_predictions(task_name_or_obj,
 
     # save the predictions
     predictions_data = dict()
-    for id_, input_, prediction in zip(examples, string_inputs, predictions):
+    for id_, input_, prediction in zip(examples, preproc_input_prompts, predictions):
         predictions_data[id_] = {"input": input_, "prediction": prediction}
 
     if '/' in manager.model_name:
