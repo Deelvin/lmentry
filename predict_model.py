@@ -1,7 +1,7 @@
 import argparse
 from tqdm import tqdm
 
-from lmentry.predict import generate_all_hf_predictions
+from lmentry.predict import HFTaskPredictor
 from tasks.task_utils import get_tasks_names, task_groups, all_tasks
 from lmentry.constants import DEFAULT_MAX_LENGTH
 
@@ -24,9 +24,9 @@ def parse_args():
                            "If set 'None' or the value is bigger than all samples number - all samples will be chosen.")
   parser.add_argument('-ml', '--max_length', type=int, default=DEFAULT_MAX_LENGTH,
                       help="Output max length")
-  parser.add_argument('--use_vllm', type=bool, default=False,
-                      help="Whether to use vLLM inference. ")
-  parser.add_argument('-fp', '--force_predict', type=bool, default=False,
+  parser.add_argument('-uv', '--use_vllm', action='store_true', default=False,
+                      help="Whether to use vLLM inference.")
+  parser.add_argument('-fp', '--force_predict', action="store_true", default=False,
                       help="Whether to force regenerate predictions.")
 
   args = parser.parse_args()
@@ -45,15 +45,19 @@ def main():
   # TODO: Check that all other TODOs are done or marked [V]
   task_names = get_tasks_names(args.task_names)
 
-  for model_name in tqdm(args.model_names, desc="Predict specified models"):
-    print(f"Prediction of tasks for {model_name} model starts")
-    generate_all_hf_predictions(
-      task_names=task_names,
-      model_name=model_name,
+  # Init predictor
+  predictor = HFTaskPredictor(
       max_length=args.max_length,
       batch_size=args.batch_size,
-      device=args.device,
       samples_num=args.samples_num,
+  )
+
+  for model_name in tqdm(args.model_names, desc="Predict specified models"):
+    print(f"Prediction of tasks for {model_name} model starts")
+    predictor.generate(
+      task_names=task_names,
+      model_name=model_name,
+      device=args.device,
       use_vllm=args.use_vllm,
       force_predict=args.force_predict,
     )
