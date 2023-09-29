@@ -12,6 +12,7 @@ import openai
 from tasks.task_utils import all_tasks, get_task
 from lmentry.model_manager import ModelManager
 from lmentry.input_preprocessor import PromptPreprocessor
+from lmentry.output_postprocessor import PredictionPostprocessor
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.INFO)
 
@@ -79,7 +80,7 @@ def generate_task_hf_predictions(task_name_or_obj,
     preproc_input_prompts = preprocessor.preprocess(raw_input_prompts)
 
     # generate predictions
-    predictions: list[str] = []
+    raw_predictions: list[str] = []
 
     if use_vllm:
         from vllm import SamplingParams
@@ -94,7 +95,7 @@ def generate_task_hf_predictions(task_name_or_obj,
     
         for batch_of_strings in tqdm(_batcher(preproc_input_prompts, batch_size), desc="Predict batch of requests"):
             outputs = model.generate(batch_of_strings, sampling_params)
-            predictions.extend(outputs)
+            raw_predictions.extend(outputs)
     else:
         for batch_of_strings in tqdm(_batcher(preproc_input_prompts, batch_size), desc="Predict batch of requests"):
             batched_encoding = tokenizer(batch_of_strings, padding="longest", return_tensors="pt")
@@ -103,11 +104,15 @@ def generate_task_hf_predictions(task_name_or_obj,
             prompt_len = tensor_inputs.shape[1]
             tensor_outputs = model.generate(tensor_inputs, max_length=max_length + prompt_len)
             outputs = tokenizer.batch_decode(tensor_outputs, skip_special_tokens=True)
-            predictions.extend(outputs)
+            raw_predictions.extend(outputs)
+
+    # Postprocess output predictions if need
+    postprocessor = PredictionPostprocessor()
+    postproc_predictions = postprocessor.postprocess(raw_predictions)
 
     # save the predictions
     predictions_data = dict()
-    for id_, input_, prediction in zip(examples, preproc_input_prompts, predictions):
+    for id_, input_, prediction in zip(examples, preproc_input_prompts, postproc_predictions):
         predictions_data[id_] = {"input": input_, "prediction": prediction}
 
     if '/' in manager.model_name:
