@@ -25,9 +25,8 @@ class LMentryTask:
     def create_data(self):
         raise NotImplementedError
 
-    def is_predicted(self, model_name, use_vllm, samples_num):
-        # TODO(vvchernov): add advanced postfix (like "_vllm_b1000")
-        output_file = self.predictions_dir.joinpath(model_name).with_suffix(".vllm.json" if use_vllm else ".json")
+    def is_predicted(self, model_name, samples_num):
+        output_file = self.predictions_dir.joinpath(model_name).with_suffix(".json")
 
         if output_file.exists():
             with open(output_file) as task_json:

@@ -107,7 +107,7 @@ def generate_task_hf_predictions(task_name_or_obj,
 
     if '/' in manager.model_name:
         manager.model_name = manager.short_name
-    output_path = output_path or task.predictions_dir.joinpath(manager.model_name).with_suffix(".vllm.json" if use_vllm else ".json")
+    output_path = output_path or task.predictions_dir.joinpath(manager.model_name).with_suffix("_vllm.json" if use_vllm else ".json")
 
     with open(output_path, "w") as f_predictions:
         json.dump(predictions_data, f_predictions, indent=2)
@@ -124,7 +124,7 @@ def generate_all_hf_predictions(task_names: list[str] = None, model_name: str = 
         # check task and skip it if it has been done
         task = get_task(task_name)
 
-        if force_predict or not task.is_predicted(manager.model_name, use_vllm, samples_num):
+        if force_predict or not task.is_predicted(manager.model_name, samples_num):
             generate_task_hf_predictions(task, manager, model_name, max_length, batch_size, device, samples_num, use_vllm)
 
 
