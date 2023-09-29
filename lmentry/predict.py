@@ -38,7 +38,7 @@ def get_part_from(examples: dict, samples_num: int=None):
         return examples
 
 
-def generate_task_hf_predictions(task_name,
+def generate_task_hf_predictions(task_name_or_obj,
                                  manager: ModelManager = None,
                                  model_name: str="",
                                  max_length: int=50,
@@ -48,7 +48,7 @@ def generate_task_hf_predictions(task_name,
                                  use_vllm: bool=True,
                                  data_path=None,
                                  output_path=None):
-    task = get_task(task_name)
+    task = get_task(task_name_or_obj) if isinstance(task_name_or_obj, str) else task_name_or_obj
 
     if not model_name and not manager:
         raise ValueError("must provide either `model_name` or `model manager`")
@@ -137,7 +137,7 @@ def generate_all_hf_predictions(task_names: list[str] = None, model_name: str = 
                         logging.info(f"Task {task.name} was skipped due to it was done before. ({len(task_config)} generated vs. {samples_num} requested)\nUse '--force_predict' to force predictions generation.")
                         continue
 
-        generate_task_hf_predictions(task_name, manager, model_name, max_length, batch_size, device, samples_num, use_vllm)
+        generate_task_hf_predictions(task, manager, model_name, max_length, batch_size, device, samples_num, use_vllm)
 
 
 # todo make the saving of the metadata optional (with a default yes as we do it ourselves)
