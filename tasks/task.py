@@ -33,7 +33,7 @@ class LMentryTask:
                 task_config = json.load(task_json)
             if bool(task_config):
                 # TODO(vvchernov): it is excess check or we need discuss scenario for it
-                if samples_num <= len(task_config):
+                if samples_num and samples_num <= len(task_config):
                     logging.info(f"Task {self.name} was skipped due to it was done before. ({len(task_config)} generated vs. {samples_num} requested)\nUse '--force_predict' to force predictions generation.")
                     return True
         return False
