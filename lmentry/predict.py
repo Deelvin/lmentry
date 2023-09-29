@@ -191,31 +191,27 @@ class OpenAIPredictor(PredictorBase):
                      output_path)
 
   # todo make the saving of the metadata optional (with a default yes as we do it ourselves)
+  # TODO(vvchernov): upstream args
   def generate_task(
       self,
-      task_name: str,
+      task_name_or_obj,
       model_name: str = "",
-      data_path=None,
-      output_path: Path = None,
       overwrite_existing_predictions=False,
       min_ms_between_api_calls: int = 20,
       log_progress_every_n_examples: int = 100,
       save_every_n_examples: int = 300,
       org_name: str = ""
   ):
-    task = get_task(task_name)
+    task = get_task(task_name_or_obj) if isinstance(task_name_or_obj, str) else task_name_or_obj
 
     # load task data
-    data_path = data_path or task.default_data_path
-    with open(data_path) as f_examples:
-      data = json.load(f_examples)
-    # get the inputs from the task data
-    examples = data["examples"]
+    examples = task.get_data(self.data_path)
+    examples = self.get_part_from(examples)
 
     if save_every_n_examples > len(examples):
       save_every_n_examples = len(examples)
 
-    output_path = output_path or task.predictions_dir.joinpath(model_name).with_suffix(".json")
+    output_path = self.output_path or task.predictions_dir.joinpath(model_name).with_suffix(".json")
     output_with_metadata_path = output_path.with_stem(f"{output_path.stem}_with_metadata")
 
     logging.info(f"generating predictions for {task.name} with OpenAI {model_name}")
@@ -345,3 +341,164 @@ class OpenAIPredictor(PredictorBase):
                    repeat(log_progress_every_n_examples), repeat(save_every_n_examples), repeat(org_name))
     with Pool(processes=num_processes) as pool:
         pool.starmap(self.generate_task, starargs)
+
+
+class OctoAIPredictor(PredictorBase):
+  def __init__(self,
+               max_length: int=256,
+               batch_size: int=200,
+               samples_num: int=None,
+               data_path=None,
+               output_path=None):
+    super().__init__(self,
+                     max_length,
+                     batch_size,
+                     samples_num,
+                     data_path,
+                     output_path)
+
+  def call_octoai_inference(self, user_input, model_name):
+    import requests
+    # Load environment variables from .env file
+    #load_dotenv()
+
+    # Get the API key from the environment variables
+    api_key = OCTOAI_API_KEY#os.getenv("OCTOAI_API_KEY")
+
+    if api_key is None:
+      raise ValueError("API_KEY not found in the .env file")
+
+    url = "https://llama-2-70b-chat-demo-kk0powt97tmb.octoai.run/v1/chat/completions"
+
+    headers = {
+        "accept": "text/event-stream",
+        "authorization": f"Bearer {api_key}",
+        "content-type": "application/json",
+    }
+
+    # TODO(vvchernov): model name hard code
+    model_name = "llama-2-70b-chat"
+    data = {
+        "model": model_name,
+        "messages": [
+            {
+                "role": "assistant",
+                "content": "Below is an instruction that describes a task. Write a response that appropriately completes the request."
+            },
+            {
+                "role": "user",
+                "content": user_input
+            }
+        ],
+        "stream": False,
+        "max_tokens": 256
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code != 200:
+      print(f"Error: {response.status_code} - {response.text}")
+
+    return response
+
+  def generate_task_parallel(self, id_, examples, model_name, predictions):
+    id_ = str(id_)
+    prompt = examples[id_]["input"]
+    response = self.call_octoai_inference(prompt, model_name)
+
+    predictions[id_] = dict()
+    predictions[id_]["input"] = prompt
+
+    response = json.loads(response.text)
+
+    predictions[id_]["prediction"] = response['choices'][0]['message']['content']
+    print(predictions[id_])
+
+  # TODO(vvchernov): upstream args
+  def generate_task(self,
+                    task_name_or_obj,
+                    manager: ModelManager = None,
+                    model_name: str="",
+                    device: str="cuda",
+                    use_vllm: bool=True,
+                    overwrite_existing_predictions=False,
+                    log_progress_every_n_examples: int = 10,
+                    save_every_n_examples: int = 300):
+
+    import concurrent.futures
+    # TODO(vvchernov): looks like OpenAI pipeline
+    task = get_task(task_name_or_obj) if isinstance(task_name_or_obj, str) else task_name_or_obj
+
+    # load task data
+    examples = task.get_data(self.data_path)
+    examples = self.get_part_from(examples)
+
+    if save_every_n_examples > len(examples):
+      save_every_n_examples = len(examples)
+
+    output_path = output_path or task.predictions_dir.joinpath(model_name).with_suffix(".json")
+    output_with_metadata_path = output_path.with_stem(f"{output_path.stem}_with_metadata")
+
+    logging.info(f"generating predictions for {task.name} with OctoAI {model_name}")
+
+    # check if we already have some predictions
+    # (e.g. if the openai API failed before finishing to generate predictions for all examples)
+    id_to_start_predictions_from = 1
+    if overwrite_existing_predictions or not output_path.is_file():
+      predictions = dict()
+    else:
+      with open(output_with_metadata_path) as preexisting_predictions_f:
+        # we use `output_with_metadata_path` here and not `output` as in this method
+        # `predictions` include the metadata.
+        predictions = json.load(preexisting_predictions_f)
+      # get the first id we should start to predict from
+      n_preexisting_predictions = len(predictions)
+      id_to_start_predictions_from = n_preexisting_predictions + 1
+      if 0 < n_preexisting_predictions < len(examples):
+        logging.info(f"{output_path} already contains the first {n_preexisting_predictions} predictions. starting to generate predictions from id {id_to_start_predictions_from}")
+      elif n_preexisting_predictions == len(examples):
+        logging.info(f"{output_path} already contains all {len(examples)} predictions. to overwrite, set overwrite_existing_predictions=True")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+      futures = []
+      for id_ in range(id_to_start_predictions_from, 150): #len(examples) + 1):
+        futures.append(executor.submit(self.generate_task_parallel, id_, examples, model_name, predictions))
+
+      for future in concurrent.futures.as_completed(futures):
+        try:
+          future.result()
+        except Exception as exc:
+          logging.error(f"Error generating predictions: {exc}")
+
+      if int(id_) % log_progress_every_n_examples == 0:
+        logging.info(f'generated predictions up to id {int(id_)} for {task.name} using OpenAI {model_name}')
+      if int(id_) % save_every_n_examples == 0:
+        # todo using jsonl instead of json would save all the rewriting, but I choose to
+        #  keep the io overhead for now in favor of if it ain't broken don't fix it
+        # save a version of the predictions that contains the prediction metadata
+        with open(output_with_metadata_path, "w") as f_predictions_with_metadata:
+          json.dump(predictions, f_predictions_with_metadata, indent=2)
+        # save the predictions without the metadata
+        predictions_without_metadata = dict()
+        for id_ in predictions:
+          predictions_without_metadata[id_] = dict()
+          for field_name in predictions[id_]:
+            if field_name != "metadata":
+              predictions_without_metadata[id_][field_name] = predictions[id_][field_name]
+          with open(output_path, "w") as f_predictions:
+            json.dump(predictions_without_metadata, f_predictions, indent=2)
+
+        logging.info(f'saved predictions up to id {int(id_)} for {task.name} using OpenAI {model_name}')
+
+    # save remaining unsaved predictions (if any)
+    n_generated_predictions = len(predictions) - id_to_start_predictions_from + 1
+    if n_generated_predictions % save_every_n_examples != 0:
+      with open(output_with_metadata_path, "w") as f_predictions_with_metadata:
+        json.dump(predictions, f_predictions_with_metadata, indent=2)
+      with open(output_path, "w") as f_predictions:
+        json.dump(predictions, f_predictions, indent=2)
+
+    logging.info(
+        f'finished generating predictions for all {len(examples)} examples of {task.name} using OpenAI {model_name}')
+
+    return
