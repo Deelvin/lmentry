@@ -124,20 +124,8 @@ def generate_all_hf_predictions(task_names: list[str] = None, model_name: str = 
         # check task and skip it if it has been done
         task = get_task(task_name)
 
-        if not force_predict:
-            # TODO(vvchernov): add advanced postfix (like "_vllm_b1000")
-            output_file = task.predictions_dir.joinpath(manager.model_name).with_suffix(".vllm.json" if use_vllm else ".json")
-
-            if output_file.exists():
-                with open(output_file) as task_json:
-                    task_config = json.load(task_json)
-                if bool(task_config):
-                    # TODO(vvchernov): it is excess check or we need discuss scenario for it
-                    if samples_num and samples_num <= len(task_config):
-                        logging.info(f"Task {task.name} was skipped due to it was done before. ({len(task_config)} generated vs. {samples_num} requested)\nUse '--force_predict' to force predictions generation.")
-                        continue
-
-        generate_task_hf_predictions(task, manager, model_name, max_length, batch_size, device, samples_num, use_vllm)
+        if force_predict or not task.is_predicted(manager.model_name, use_vllm, samples_num):
+            generate_task_hf_predictions(task, manager, model_name, max_length, batch_size, device, samples_num, use_vllm)
 
 
 # todo make the saving of the metadata optional (with a default yes as we do it ourselves)
