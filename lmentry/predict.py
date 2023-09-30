@@ -502,3 +502,20 @@ class OctoAIPredictor(PredictorBase):
         f'finished generating predictions for all {len(examples)} examples of {task.name} using OpenAI {model_name}')
 
     return
+
+class PredictorFactory():
+  predictors_map = {
+    "hf": HFTaskPredictor,
+    "openai": OpenAIPredictor,
+    "octoai": OctoAIPredictor,
+  }
+
+  def __init__(self) -> None:
+    pass
+
+  @staticmethod
+  def get_predictor(name: str, *args):
+    if name in PredictorFactory.predictors_map.keys():
+      return PredictorFactory.predictors_map[name](*args)
+    else:
+      raise NotImplementedError(f"Predictor with name {name} is not supported!")
