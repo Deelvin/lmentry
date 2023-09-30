@@ -514,8 +514,8 @@ class PredictorFactory():
     pass
 
   @staticmethod
-  def get_predictor(name: str, *args):
+  def get_predictor(name: str, **kwargs):
     if name in PredictorFactory.predictors_map.keys():
-      return PredictorFactory.predictors_map[name](*args)
+      return PredictorFactory.predictors_map[name](**kwargs)
     else:
       raise NotImplementedError(f"Predictor with name {name} is not supported!")

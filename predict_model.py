@@ -1,7 +1,7 @@
 import argparse
 from tqdm import tqdm
 
-from lmentry.predict import HFTaskPredictor
+from lmentry.predict import PredictorFactory
 from tasks.task_utils import get_tasks_names, task_groups, all_tasks
 from lmentry.constants import DEFAULT_MAX_LENGTH
 
@@ -15,6 +15,8 @@ def parse_args():
                            f"Task set names should be from the list: {task_groups.keys()}. "
                            f"Task names should be from the list: {all_tasks}. "
                            "It tries to analyze all tasks by default")
+  parser.add_argument("-p", "--predictor_type", type=str, default="hf",
+                      help=f"Type of predictor, can be chosen from the list: {PredictorFactory.predictors_map.keys()}")
   parser.add_argument('-d', '--device', type=str, default="cuda",
                       help="Device name. It is needed and used by mlc model only")
   parser.add_argument('-b', '--batch_size', type=int, default=100,
@@ -46,7 +48,8 @@ def main():
   task_names = get_tasks_names(args.task_names)
 
   # Init predictor
-  predictor = HFTaskPredictor(
+  predictor = PredictorFactory.get_predictor(
+      name=args.predictor_type,
       max_length=args.max_length,
       batch_size=args.batch_size,
       samples_num=args.samples_num,
