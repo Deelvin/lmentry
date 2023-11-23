@@ -1,25 +1,19 @@
 import random
 
-from lmentry.scorers.smaller_number_scorer import SmallerNumberScorer
+from lmentry.scorers.bigger_number_scorer_ru import BiggerNumberScorerRu
 from tasks.task import LMentryTask
 
 
-class SmallerNumber(LMentryTask):
+class BiggerNumberRu(LMentryTask):
 
-    scorer_cls = SmallerNumberScorer
+    scorer_cls = BiggerNumberScorerRu
 
-    def __init__(self, name="smaller_number_ru"):
+    def __init__(self, name="bigger_number_ru"):
         super().__init__(name)
-        self.canonical_template = "Q: Which number is smaller, {n1} or {n2}?\nA:"
-        self.second_template = "Q: Of the numbers {n1} and {n2}, which is smaller?\nA:"
-        self.third_template = "From the numbers {n1} and {n2}, write the smaller number:\n"
-
-        self.fourth_template = "Q: Which number is lesser, {n1} or {n2}?\nA:"
-        self.fifth_template = "Q: Of the numbers {n1} and {n2}, which is lesser?\nA:"
-        self.sixth_template = "From the numbers {n1} and {n2}, write the lesser number:\n"
-        
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template, 
-                              self.fourth_template, self.fifth_template, self.sixth_template]
+        self.canonical_template = "Q: Какое число больше: {n1} или {n2}?\nA:"
+        self.second_template = "Q: Какое из чисел больше: {n1} или {n2}?\nA:"
+        self.third_template = "Q: Из чисел {n1} и {n2} выпишите большее.\nA:"
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template]
         self.parameter_names = ["answer", "distractor"]
 
     def _create_input(self, template, n1, n2):
@@ -49,15 +43,15 @@ class SmallerNumber(LMentryTask):
                 num_examples_created += 1
 
                 input_ = self._create_input(template, n1=numbers[0], n2=numbers[1])
-                min_val = min(numbers[0], numbers[1])
+                max_val = max(numbers[0], numbers[1])
 
                 # create the metadata
                 metadata = dict()
                 metadata["num_digits"] = [len(str(numbers[0])), len(str(numbers[1]))]
                 metadata["n1"] = numbers[0]
                 metadata["n2"] = numbers[1]
-                metadata["answer"] = min_val
-                metadata["answer_index"] = numbers.index(min_val)
+                metadata["answer"] = max_val
+                metadata["answer_index"] = numbers.index(max_val)
                 metadata["distractor"] = metadata["n2"] if metadata["answer_index"] == 0 else metadata["n1"]
                 metadata["template_id"] = template_id
 
@@ -85,5 +79,5 @@ class SmallerNumber(LMentryTask):
 
 
 if __name__ == '__main__':
-    task = SmallerNumber()
-    task.create_data()
+    task = BiggerNumberRu()
+    # task.create_data()

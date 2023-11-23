@@ -47,7 +47,7 @@ class LMentryTask:
     def save_task_data(self, task_data, task_data_path):
         task_data_path = task_data_path or self.default_data_path
         with open(task_data_path, "w") as f:
-            json.dump(task_data, f, indent=2)
+            json.dump(task_data, f, indent=2, ensure_ascii=False)
 
     def score_predictions(self, model_name, forced_scoring: bool = False):
         logging.info(f"starting to score {self.name} predictions for {model_name}")

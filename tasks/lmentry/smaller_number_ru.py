@@ -1,25 +1,19 @@
 import random
 
-from lmentry.scorers.smaller_number_scorer import SmallerNumberScorer
+from lmentry.scorers.smaller_number_scorer_ru import SmallerNumberScorerRu
 from tasks.task import LMentryTask
 
 
-class SmallerNumber(LMentryTask):
+class SmallerNumberRu(LMentryTask):
 
-    scorer_cls = SmallerNumberScorer
+    scorer_cls = SmallerNumberScorerRu
 
     def __init__(self, name="smaller_number_ru"):
         super().__init__(name)
-        self.canonical_template = "Q: Which number is smaller, {n1} or {n2}?\nA:"
-        self.second_template = "Q: Of the numbers {n1} and {n2}, which is smaller?\nA:"
-        self.third_template = "From the numbers {n1} and {n2}, write the smaller number:\n"
-
-        self.fourth_template = "Q: Which number is lesser, {n1} or {n2}?\nA:"
-        self.fifth_template = "Q: Of the numbers {n1} and {n2}, which is lesser?\nA:"
-        self.sixth_template = "From the numbers {n1} and {n2}, write the lesser number:\n"
-        
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template, 
-                              self.fourth_template, self.fifth_template, self.sixth_template]
+        self.canonical_template = "Q: Какое число меньше: {n1} или {n2}?\nA:"
+        self.second_template = "Q: Какое из чисел меньше: {n1} или {n2}?\nA:"
+        self.third_template = "Q: Из чисел {n1} и {n2} выпишите меньшее.\nA:"
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template]
         self.parameter_names = ["answer", "distractor"]
 
     def _create_input(self, template, n1, n2):
@@ -85,5 +79,5 @@ class SmallerNumber(LMentryTask):
 
 
 if __name__ == '__main__':
-    task = SmallerNumber()
-    task.create_data()
+    task = SmallerNumberRu()
+    # task.create_data()
