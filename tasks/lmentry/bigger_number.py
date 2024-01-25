@@ -13,7 +13,13 @@ class BiggerNumber(LMentryTask):
         self.canonical_template = "Q: Which number is bigger, {n1} or {n2}?\nA:"
         self.second_template = "Q: Of the numbers {n1} and {n2}, which is bigger?\nA:"
         self.third_template = "From the numbers {n1} and {n2}, write the bigger number:\n"
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template]
+
+        self.fourth_template = "Q: Which number is larger, {n1} or {n2}?\nA:"
+        self.fifth_template = "Q: Of the numbers {n1} and {n2}, which is larger?\nA:"
+        self.sixth_template = "From the numbers {n1} and {n2}, write the larger number:\n"
+        
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template, 
+                              self.fourth_template, self.fifth_template, self.sixth_template]
         self.parameter_names = ["answer", "distractor"]
 
     def _create_input(self, template, n1, n2):

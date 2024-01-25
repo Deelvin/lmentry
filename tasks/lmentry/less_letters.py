@@ -17,7 +17,14 @@ class LessLetters(LMentryTask):
         self.canonical_template = 'Q: Which word has fewer letters, "{word1}" or "{word2}"?\nA:'
         self.second_template = 'Q: Which word is shorter, "{word1}" or "{word2}"?\nA:'
         self.third_template = 'Q: Of the words "{word1}" and "{word2}" which one has fewer letters?\nA:'
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template]
+        
+        self.fourth_template = 'Q: Which word has less letters, "{word1}" or "{word2}"?\nA:'
+        self.fifth_template = 'Q: Which word has the smaller length, "{word1}" or "{word2}"?\nA:'
+        self.sixth_template = 'Q: Of the words "{word1}" and "{word2}" which one has the smaller number of letters?\nA:'
+        
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template
+                              self.fourth_template, self.fifth_template, self.sixth_template]
+
         self.parameter_names = ["answer", "distractor"]
 
     def get_source_data(self):

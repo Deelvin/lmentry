@@ -15,8 +15,14 @@ class FirstAlphabetically(LMentryTask):
         self.canonical_template = "Q: In an alphabetical order, which of the words \"{word1}\" and \"{word2}\" comes first?\nA:"
         self.second_template = "Q: In an alphabetical order, which word comes first, \"{word1}\" or \"{word2}\"?\nA:"
         self.third_template = "Q: Of the words \"{word1}\" and \"{word2}\", which word comes first alphabetically?\nA:"
+
+        self.fourth_template = "Q: In an alphabetical order, which word comes before \"{word1}\" or \"{word2}\"?\nA:"
+        self.fifth_template = "Q: Which word, \"{word1}\" or \"{word2}\", comes first when arranged in alphabetical order?\nA:"
+        self.sixth_template = "Q: Of the words \"{word1}\" and \"{word2}\", which word comes first in an alphabetical order?\nA:"
+        
         self.parameter_names = ["answer", "distractor"]
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template]
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template
+                              self.fourth_template, self.fifth_template, self.sixth_template]
         self.words_path = words_path or LMENTRY_WORDS_PATH
 
     def get_task_words(self):
