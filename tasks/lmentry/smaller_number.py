@@ -86,3 +86,4 @@ class SmallerNumber(LMentryTask):
 
 if __name__ == '__main__':
     task = SmallerNumber()
+    task.create_data()

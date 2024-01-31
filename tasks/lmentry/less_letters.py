@@ -111,3 +111,4 @@ class LessLetters(LMentryTask):
 
 if __name__ == '__main__':
     task = LessLetters()
+    task.create_data()

@@ -96,3 +96,4 @@ class FirstAlphabetically(LMentryTask):
 
 if __name__ == '__main__':
     task = FirstAlphabetically()
+    task.create_data()

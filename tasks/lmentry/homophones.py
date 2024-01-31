@@ -76,3 +76,4 @@ class Homophones(LMentryTask):
 
 if __name__ == '__main__':
     task = Homophones()
+    task.create_data()

@@ -86,3 +86,4 @@ class BiggerNumber(LMentryTask):
 
 if __name__ == '__main__':
     task = BiggerNumber()
+    task.create_data()
