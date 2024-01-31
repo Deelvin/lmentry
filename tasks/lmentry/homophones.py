@@ -21,7 +21,7 @@ class Homophones(LMentryTask):
         self.fifth_template = "Q: Of the two words \"{word1}\" and \"{word2}\", which one sounds more simular to \"{query}\"?\nA:"
         self.sixth_template = "Q: Of the two words \"{word1}\" and \"{word2}\" which one is a homophone of the word \"{query}\"?\nA:"
         
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template,
                               self.fourth_template, self.fifth_template, self.sixth_template]
         self.parameter_names = ["query", "answer", "distractor"]
 

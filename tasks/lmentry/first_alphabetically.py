@@ -21,7 +21,7 @@ class FirstAlphabetically(LMentryTask):
         self.sixth_template = "Q: Of the words \"{word1}\" and \"{word2}\", which word comes first in an alphabetical order?\nA:"
         
         self.parameter_names = ["answer", "distractor"]
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template,
                               self.fourth_template, self.fifth_template, self.sixth_template]
         self.words_path = words_path or LMENTRY_WORDS_PATH
 
