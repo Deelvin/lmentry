@@ -91,7 +91,7 @@ class ModelManager:
       self.tokenizer = AutoTokenizer.from_pretrained(self.predictor_name, padding_side='left')
     elif self.type == "mlc":
       self.tokenizer = AutoTokenizer.from_pretrained(
-        Path(self.config["artifact_path"]).joinpath("params"), trust_remote_code=True
+        Path(self.config["artifact_path"]).joinpath("model"), trust_remote_code=True
       )
       self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
       if self.model_name.startswith("dolly-"):
