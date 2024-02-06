@@ -33,15 +33,15 @@ def get_type_config(
     type = "mlc"
     model_root = Path(model_name)
 
-    mlc_config_file = model_root.joinpath("model/mlc-model-config.json")
+    mlc_config_file = model_root.joinpath("params/mlc-chat-config.json")
 
     mlc_config = {}
     with open(mlc_config_file) as json_file:
       mlc_config = json.load(json_file)
 
-    model_name_or_path = mlc_config["_name_or_path"]
+    model_local_id = mlc_config["local_id"]
     if name_from_mlc_config:
-      config_model_name = model_name_or_path
+      config_model_name = model_local_id
     else:
       config_model_name = str(model_root).split("/")[-1]
     config_model_name = config_model_name.replace(".", "-")
@@ -49,10 +49,10 @@ def get_type_config(
     config ={
       "model_name": config_model_name,
       "artifact_path": model_name,
-      "mlc_model_name": model_name_or_path,
+      "mlc_model_name": model_local_id,
       "device": device,
-      "temperature": 0,
-      "top_p": 1,
+      "temperature": mlc_config["temperature"],
+      "top_p": mlc_config["top_p"],
     }
   else:
     raise ValueError(f"Model name {model_name} is not in the list and not the path to mlc-llm model")
@@ -91,7 +91,7 @@ class ModelManager:
       self.tokenizer = AutoTokenizer.from_pretrained(self.predictor_name, padding_side='left')
     elif self.type == "mlc":
       self.tokenizer = AutoTokenizer.from_pretrained(
-        Path(self.config["artifact_path"]).joinpath("model"), trust_remote_code=True
+        Path(self.config["artifact_path"]).joinpath("params"), trust_remote_code=True
       )
       self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
       if self.model_name.startswith("dolly-"):

@@ -1,7 +1,6 @@
 import os
 from typing import Callable, List
 
-import json
 import torch
 import numpy as np
 
@@ -24,21 +23,10 @@ class TVMModel:
   def __init__(self, config: dict) -> None:
     self.device = tvm.device(config["device"])
     self.const_params = load_params(config["artifact_path"], self.device)
-
-    build_config_file = os.path.join(
-      config["artifact_path"],
-      "build_config.json",
-    )
-
-    build_config = {}
-    with open(build_config_file) as json_file:
-      build_config = json.load(json_file)
-
-    lib_name = build_config["library_name"]
     ex = tvm.runtime.load_module(
       os.path.join(
         config["artifact_path"],
-        lib_name,
+        f"{config['mlc_model_name']}-{config['device']}.so",
       )
     )
     self.vm = relax.VirtualMachine(ex, self.device)
