@@ -2,40 +2,115 @@ import json
 import logging
 import os
 import time
+
 from itertools import repeat
 from multiprocessing import Pool
 from pathlib import Path
 from tqdm import tqdm
+from typing import List, Optional
 
 import openai
 
 from tasks.task_utils import all_tasks, get_task
 from lmentry.model_manager import ModelManager
+from lmentry.mlc_serve_wrapper import get_mlc_serve_model
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.INFO)
 
 
-def _batcher(sequence, batch_size):
-    for i in range(0, len(sequence), batch_size):
-        yield sequence[i:i + batch_size]
+class PredictorBase():
+  def __init__(
+    self,
+    max_length: int=50,
+    batch_size: int=200,
+    samples_num: int=None,
+    data_path=None,
+    output_path=None,
+  ):
+    self.max_length = max_length
+    self.batch_size = batch_size
+    self.samples_num = samples_num
+    self.data_path = data_path
+    self.output_path = output_path
 
+  def _batcher(self, sequence):
+    for i in range(0, len(sequence), self.batch_size):
+      yield sequence[i:i + self.batch_size]
 
-def _ms_since_epoch():
+  @staticmethod
+  def _ms_since_epoch():
     return time.perf_counter_ns() // 1000000
 
-
-def get_part_from(examples: dict, samples_num: int=None):
+  def get_part_from(self, examples: dict):
     ex_num = len(examples)
-    if samples_num and samples_num < ex_num:
-        import random
-        cut_idx = sorted(random.sample(range(1, ex_num + 1), samples_num))
-        cut_examples = dict()
+    if self.samples_num and self.samples_num < ex_num:
+      import random
+      cut_idx = sorted(random.sample(range(1, ex_num + 1), self.samples_num))
+      cut_examples = dict()
 
-        for idx in cut_idx:
-            cut_examples[str(idx)] = examples[str(idx)]
-        return cut_examples
+      for idx in cut_idx:
+        cut_examples[str(idx)] = examples[str(idx)]
+      return cut_examples
     else:
-        return examples
+      return examples
+
+  def generate_task(self):
+    raise NotImplementedError("Generate task method is not implemented in base class")
+
+  def save_predictions(
+    self,
+    output_path,
+    examples,
+    preproc_input_prompts,
+    postproc_predictions
+  ) -> None:
+    predictions_data = dict()
+    for id_, input_, prediction in zip(examples, preproc_input_prompts, postproc_predictions):
+      predictions_data[id_] = {"input": input_, "prediction": prediction}
+
+    with open(output_path, "w") as f_predictions:
+      json.dump(predictions_data, f_predictions, indent=2)
+
+  def generate(
+    self,
+    task_names: Optional[List[str]] = None,
+    model_name: str = "",
+    device: str = "cuda",
+    use_vllm: bool = False,
+    force_predict: bool = False
+  ):
+    task_names = task_names or all_tasks
+    # TODO(vvchernov): remove max_length
+    manager = ModelManager(model_name, device, self.max_length, use_vllm)
+    if manager.type == "mlc":
+      self.batch_size = 1
+    for task_name in tqdm(task_names, desc="Predict tasks"):
+      task = get_task(task_name)
+
+      # check task and skip it if it has been done
+      # TODO(vvchernov): remove samples num?
+      if force_predict or not task.is_predicted(manager.model_name, self.samples_num):
+        self.generate_task(task, manager, model_name, device, use_vllm)
+
+
+class HFTaskPredictor(PredictorBase):
+  def __init__(
+    self,
+    max_length: int=50,
+    batch_size: int=200,
+    samples_num: int=None,
+    data_path=None,
+    output_path=None,
+    **kwargs,
+  ):
+    super().__init__(
+      self,
+      max_length,
+      batch_size,
+      samples_num,
+      data_path,
+      output_path
+    )
 
 
 def get_default_output_path(manager, task, use_vllm):
@@ -290,3 +365,130 @@ def generate_all_openai_predictions(task_names: list[str] = None, model_name: st
                    repeat(log_progress_every_n_examples), repeat(save_every_n_examples), repeat(org_name))
     with Pool(processes=num_processes) as pool:
         pool.starmap(generate_task_openai_predictions, starargs)
+
+
+class OpenAITaskPredictor(PredictorBase):
+  def __init__(
+    self,
+    max_length: int=-1,
+    batch_size: int=200,
+    samples_num: int=None,
+    data_path=None,
+    output_path=None,
+    **kwargs,
+  ):
+    super().__init__(
+      self,
+      max_length,
+      batch_size,
+      samples_num,
+      data_path,
+      output_path
+    )
+
+
+class OctoAITaskPredictor(PredictorBase):
+  def __init__(
+    self,
+    max_length: int=256,
+    batch_size: int=200,
+    samples_num: int=None,
+    data_path=None,
+    output_path=None,
+    **kwargs,
+  ):
+    super().__init__(
+      self,
+      max_length,
+      batch_size,
+      samples_num,
+      data_path,
+      output_path
+    )
+
+
+class MLCServeTaskPredictor(PredictorBase):
+  def __init__(
+    self,
+    max_length: int = 256,
+    batch_size: int = 16,
+    samples_num: int = None,
+    data_path = None,
+    output_path = None,
+    ip: str = "0.0.0.0",
+    port: int = 37777,
+    parallel = False,
+    **kwargs,
+  ):
+    super().__init__(
+      self,
+      max_length,
+      batch_size,
+      samples_num,
+      data_path,
+      output_path
+    )
+
+    self.ip = ip
+    self.port = port
+    self.parallel = parallel
+
+  def generate_task(
+    self,
+    task,
+    model,
+    model_name,
+  ):
+    # load task data
+    examples = task.get_data()
+    examples = self.get_part_from(examples)
+    # get the inputs from the task data
+    string_inputs = [example["input"] for example in examples.values()]
+
+    # generate predictions
+    predictions: List[str] = []
+
+    for batch_of_strings in tqdm(self._batcher(string_inputs), desc="Predict batch of requests"):
+      batch_of_outputs = model.generate(batch_of_strings)
+      predictions.extend(batch_of_outputs)
+
+    output_path = task.predictions_dir.joinpath(model_name).with_suffix(".json")
+    self.save_predictions(output_path, examples, string_inputs, predictions)
+
+  def generate(
+    self,
+    task_names: Optional[List[str]] = None,
+    model_name: str = "",
+    device: str = "cuda",
+    use_vllm: bool = False,
+    force_predict: bool = False
+  ):
+    task_names = task_names or all_tasks
+
+    model = get_mlc_serve_model(model_name, self.ip, self.port, self.parallel)
+
+    for task_name in tqdm(task_names, desc="Predict tasks"):
+      task = get_task(task_name)
+
+      # check task and skip it if it has been done
+      if force_predict or not task.is_predicted(model_name, self.samples_num):
+        self.generate_task(task, model)
+
+
+class PredictorFactory():
+  predictors_map = {
+    "hf": HFTaskPredictor,
+    "openai": OpenAITaskPredictor,
+    "octoai": OctoAITaskPredictor,
+    "mlc-serve": MLCServeTaskPredictor
+  }
+
+  def __init__(self) -> None:
+    pass
+
+  @staticmethod
+  def get_predictor(name: str, **kwargs):
+    if name in PredictorFactory.predictors_map.keys():
+      return PredictorFactory.predictors_map[name](**kwargs)
+    else:
+      raise NotImplementedError(f"Predictor with name {name} is not supported!")
