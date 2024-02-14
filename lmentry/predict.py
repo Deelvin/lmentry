@@ -378,7 +378,6 @@ class OpenAITaskPredictor(PredictorBase):
     **kwargs,
   ):
     super().__init__(
-      self,
       max_length,
       batch_size,
       samples_num,
@@ -398,7 +397,6 @@ class OctoAITaskPredictor(PredictorBase):
     **kwargs,
   ):
     super().__init__(
-      self,
       max_length,
       batch_size,
       samples_num,
@@ -416,12 +414,11 @@ class MLCServeTaskPredictor(PredictorBase):
     data_path = None,
     output_path = None,
     ip: str = "0.0.0.0",
-    port: int = 37777,
+    port: int = 9000,
     parallel = False,
     **kwargs,
   ):
     super().__init__(
-      self,
       max_length,
       batch_size,
       samples_num,

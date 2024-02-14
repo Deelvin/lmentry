@@ -32,7 +32,7 @@ def parse_args():
                       help="Whether to force regenerate predictions.")
   parser.add_argument("-ip", "--ip", type=str, default="0.0.0.0",
                       help="IP address of mlc-llm server (need for 'mlc-serve' predictor)")
-  parser.add_argument("-p", "--port", type=int, default=32777,
+  parser.add_argument("-p", "--port", type=int, default=9000,
                       help="port of mlc-llm server (need for 'mlc-serve' predictor)")
 
   args = parser.parse_args()
