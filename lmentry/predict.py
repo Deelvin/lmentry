@@ -469,7 +469,7 @@ class MLCServeTaskPredictor(PredictorBase):
 
       # check task and skip it if it has been done
       if force_predict or not task.is_predicted(model_name, self.samples_num):
-        self.generate_task(task, model)
+        self.generate_task(task, model, model_name)
 
 
 class PredictorFactory():
