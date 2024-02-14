@@ -30,7 +30,7 @@ class MLCServeModelWrapper:
   def create_chat_completion_payload(
         self,
         prompt,
-        stop_tokens = None,
+        stop_tokens = [],
     ):
         payload = {
             "model": self.model_name,
