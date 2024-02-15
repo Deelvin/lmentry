@@ -47,31 +47,31 @@ from tasks.lmentry_ru.word_containing_ru import WordContainingRu
 from tasks.lmentry_ru.word_not_containing_ru import WordNotContainingRu
 
 core_tasks_ru = {
-    "sentence_containing": SentenceContainingRu,
-    "sentence_not_containing": SentenceNotContainingRu,
-    "word_containing": WordContainingRu,
-    "word_not_containing": WordNotContainingRu,
-    "most_associated_word": MostAssociatedWordRu,
-    "least_associated_word": LeastAssociatedWordRu,
-    # "any_words_from_category": AnyWordsFromCategory,
-    # "all_words_from_category": AllWordsFromCategory,
-    "first_alphabetically": FirstAlphabeticallyRu,
-    "more_letters": MoreLettersRu,
-    "less_letters": LessLettersRu,
-    "bigger_number": BiggerNumberRu,
-    "smaller_number": SmallerNumberRu,
-    # "rhyming_word": RhymingWord,
-    # "homophones": Homophones,
-    "word_after": WordAfterRu,
-    "word_before": WordBeforeRu,
-    "starts_with_word": StartsWithWordRu,
-    "ends_with_word": EndsWithWordRu,
-    "starts_with_letter": StartsWithLetterRu,
-    "ends_with_letter": EndsWithLetterRu,
-    "first_word": FirstWordRu,
-    "last_word": LastWordRu,
-    "first_letter": FirstLetterRu,
-    "last_letter": LastLetterRu,
+    "sentence_containing_ru": SentenceContainingRu,
+    "sentence_not_containing_ru": SentenceNotContainingRu,
+    "word_containing_ru": WordContainingRu,
+    "word_not_containing_ru": WordNotContainingRu,
+    "most_associated_word_ru": MostAssociatedWordRu,
+    "least_associated_word_ru": LeastAssociatedWordRu,
+    # "any_words_from_category_ru": AnyWordsFromCategory,
+    # "all_words_from_category_ru": AllWordsFromCategory,
+    "first_alphabetically_ru": FirstAlphabeticallyRu,
+    "more_letters_ru": MoreLettersRu,
+    "less_letters_ru": LessLettersRu,
+    "bigger_number_ru": BiggerNumberRu,
+    "smaller_number_ru": SmallerNumberRu,
+    # "rhyming_word_ru": RhymingWord,
+    # "homophones_ru": Homophones,
+    "word_after_ru": WordAfterRu,
+    "word_before_ru": WordBeforeRu,
+    "starts_with_word_ru": StartsWithWordRu,
+    "ends_with_word_ru": EndsWithWordRu,
+    "starts_with_letter_ru": StartsWithLetterRu,
+    "ends_with_letter_ru": EndsWithLetterRu,
+    "first_word_ru": FirstWordRu,
+    "last_word_ru": LastWordRu,
+    "first_letter_ru": FirstLetterRu,
+    "last_letter_ru": LastLetterRu,
 }
 
 analysis_tasks_ru = {
@@ -97,11 +97,11 @@ all_tasks_ru = core_tasks_ru | analysis_tasks_ru
 
 # It is part from core tasks
 sensetive_7b_model_tasks_ru = {
-    "bigger_number": BiggerNumberRu,
-    "smaller_number": SmallerNumberRu,
-    "first_alphabetically": FirstAlphabeticallyRu,
-    "first_letter": FirstLetterRu,
-    "most_associated_word": MostAssociatedWordRu,
+    "bigger_number_ru": BiggerNumberRu,
+    "smaller_number_ru": SmallerNumberRu,
+    "first_alphabetically_ru": FirstAlphabeticallyRu,
+    "first_letter_ru": FirstLetterRu,
+    "most_associated_word_ru": MostAssociatedWordRu,
 }
 
 
