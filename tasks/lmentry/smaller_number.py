@@ -8,7 +8,7 @@ class SmallerNumber(LMentryTask):
 
     scorer_cls = SmallerNumberScorer
 
-    def __init__(self, name="smaller_number_ru"):
+    def __init__(self, name="smaller_number"):
         super().__init__(name)
         self.canonical_template = "Q: Which number is smaller, {n1} or {n2}?\nA:"
         self.second_template = "Q: Of the numbers {n1} and {n2}, which is smaller?\nA:"
