@@ -6,6 +6,9 @@ from tasks.lmentry.lmentry_tasks import (
   analysis_tasks as lmentry_analysis_tasks,
   sensetive_7b_model_tasks,
 )
+from tasks.lmentry_ru.lmentry_tasks_ru import (
+  all_tasks_ru as lmentry_all_tasks_ru,
+)
 from tasks.simple.simple_tasks import simple_tasks
 from tasks.hf.hf_tasks import hf_tasks
 
@@ -14,6 +17,7 @@ task_groups = {
   "lmentry": lmentry_all_tasks,
   "lmentry_core": lmentry_core_tasks,
   "lmentry_analysis": lmentry_analysis_tasks,
+  "lmentry_ru": lmentry_all_tasks_ru,
   "7b": sensetive_7b_model_tasks,
   "simple": simple_tasks,
   "hf": hf_tasks,
