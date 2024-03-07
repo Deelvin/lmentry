@@ -16,7 +16,13 @@ class Homophones(LMentryTask):
         self.canonical_template = "Q: Which word sounds like the word \"{query}\", \"{word1}\" or \"{word2}\"?\nA:"
         self.second_template = "Q: Of the two words \"{word1}\" and \"{word2}\", which one sounds more like \"{query}\"?\nA:"
         self.third_template = "Q: Which is a homophone of the word \"{query}\", \"{word1}\" or \"{word2}\"?\nA:"
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template]
+
+        self.fourth_template = "Q: Which word sounds simular to the word \"{query}\", \"{word1}\" or \"{word2}\"?\nA:"
+        self.fifth_template = "Q: Of the two words \"{word1}\" and \"{word2}\", which one sounds more simular to \"{query}\"?\nA:"
+        self.sixth_template = "Q: Of the two words \"{word1}\" and \"{word2}\" which one is a homophone of the word \"{query}\"?\nA:"
+        
+        self.all_templates = [self.canonical_template, self.second_template, self.third_template,
+                              self.fourth_template, self.fifth_template, self.sixth_template]
         self.parameter_names = ["query", "answer", "distractor"]
 
     def create_data(self, homophones_path: Path = None, task_data_path: Path = None):
@@ -70,3 +76,4 @@ class Homophones(LMentryTask):
 
 if __name__ == '__main__':
     task = Homophones()
+    task.create_data()
