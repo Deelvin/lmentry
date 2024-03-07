@@ -59,6 +59,7 @@ def main():
       samples_num=args.samples_num,
       ip = args.ip,
       port = args.port,
+      parallel = True,
   )
 
   for model_name in tqdm(args.model_names, desc="Predict specified models"):
