@@ -25,10 +25,10 @@ class BiggerNumber(LMentryTask):
         self.new_templates = [
             "Is {n1} or {n2} the larger number?",
             "Which of the two numbers, {n1} or {n2}, is greater?",
-            "{n1} or {n2} - which number is larger?",
+            # "{n1} or {n2} - which number is larger?",
             "Which number has a greater value, {n1} or {n2}?",
             "Among {n1} and {n2}, which one is the bigger number?",
-            "{n1} and {n2} - which number is the larger one?",
+            # "{n1} and {n2} - which number is the larger one?",
             "Compare {n1} and {n2} and tell me which one is bigger.",
             "I need to know if {n1} or {n2} is the larger number.",
             "Could you determine which number is larger between {n1} and {n2}?",
