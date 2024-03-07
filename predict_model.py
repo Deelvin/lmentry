@@ -57,6 +57,8 @@ def main():
       max_length=args.max_length,
       batch_size=args.batch_size,
       samples_num=args.samples_num,
+      ip = args.ip,
+      port = args.port,
   )
 
   for model_name in tqdm(args.model_names, desc="Predict specified models"):
