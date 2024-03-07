@@ -10,14 +10,15 @@ class BiggerNumber(LMentryTask):
 
     def __init__(self, name="bigger_number"):
         super().__init__(name)
-        self.canonical_template = "Q: Which number is bigger, {n1} or {n2}?\nA:"
-        self.second_template = "Q: Of the numbers {n1} and {n2}, which is bigger?\nA:"
-        self.third_template = "From the numbers {n1} and {n2}, write the bigger number:\n"
+        # TODO(vvchernov): initial request format "Q: <question>[?|.]\nA:"
+        self.canonical_template = "Which number is bigger, {n1} or {n2}?"
+        self.second_template = "Of the numbers {n1} and {n2}, which is bigger?"
+        self.third_template = "From the numbers {n1} and {n2}, write the bigger number."
 
-        self.fourth_template = "Q: Which number is larger, {n1} or {n2}?\nA:"
-        self.fifth_template = "Q: Of the numbers {n1} and {n2}, which is larger?\nA:"
-        self.sixth_template = "From the numbers {n1} and {n2}, write the larger number:\n"
-        
+        self.fourth_template = "Which number is larger, {n1} or {n2}?"
+        self.fifth_template = "Of the numbers {n1} and {n2}, which is larger?"
+        self.sixth_template = "From the numbers {n1} and {n2}, write the larger number."
+
         self.all_templates = [self.canonical_template, self.second_template, self.third_template, 
                               self.fourth_template, self.fifth_template, self.sixth_template]
 
