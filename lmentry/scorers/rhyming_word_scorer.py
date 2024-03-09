@@ -22,7 +22,8 @@ class RhymingWordScorer(LMentryScorer):
             rf"{a} rhyme of {query} is {answer}( and not {distractor})?",
             rf"{a} word rhyming with {query} is {answer}",
             rf"{a} word that rhymes with {query} is {answer}",
-            rf"{query} and {answer}( both)? rhyme( with each other)?, {while_} {distractor} {doesnt} rhyme with either( word)?"
+            rf"{query} and {answer}( both)? rhyme( with each other)?, {while_} {distractor} {doesnt} rhyme with either( word)?",
+            rf"{query} and {answer} are a rhyme"
         ]
 
         # swap answer and query
@@ -44,7 +45,7 @@ class RhymingWordScorer(LMentryScorer):
         score, certainty = None, None
 
         predictions_words = re.findall(r"\b[a-z]+\b", prediction)
-        if len(predictions_words) == 1 and predictions_words[0] != answer:
+        if answer not in predictions_words and not re.search("n't|not", prediction):
             score = 0
             certainty = 1
 

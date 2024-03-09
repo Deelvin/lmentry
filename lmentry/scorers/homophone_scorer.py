@@ -24,6 +24,7 @@ class HomophoneScorer(LMentryScorer):
             rf"{query} is a homophone of {answer}",
             rf"{query} and {answer} are homophones( of each other)?",
             rf"The homophone of {query} is {answer}",
+            rf"Both words have different sounds, but {answer} sounds more {like} {query}"
         ]
 
         # swap answer and query
