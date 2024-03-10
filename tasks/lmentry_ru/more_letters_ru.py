@@ -4,10 +4,10 @@ from collections import Counter
 
 from lmentry.constants import RESOURCES_RU_DIR
 from lmentry.scorers_ru.more_letters_scorer_ru import MoreLettersScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class MoreLettersRu(LMentryTask):
+class MoreLettersRu(LMentryTaskRu):
 
     scorer_cls = MoreLettersScorerRu
 

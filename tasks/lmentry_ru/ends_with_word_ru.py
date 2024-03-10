@@ -3,10 +3,10 @@ import random
 
 from lmentry.constants import LMENTRY_WORDS_RU_PATH
 from lmentry.scorers_ru.ends_with_word_scorer_ru import EndsWithWordScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class EndsWithWordRu(LMentryTask):
+class EndsWithWordRu(LMentryTaskRu):
 
     scorer_cls = EndsWithWordScorerRu
 

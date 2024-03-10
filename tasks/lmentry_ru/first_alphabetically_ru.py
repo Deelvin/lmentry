@@ -3,10 +3,10 @@ import random
 
 from lmentry.constants import LMENTRY_WORDS_RU_PATH
 from lmentry.scorers_ru.first_alphabetically_scorer_ru import FirstAlphabeticallyScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class FirstAlphabeticallyRu(LMentryTask):
+class FirstAlphabeticallyRu(LMentryTaskRu):
 
     scorer_cls = FirstAlphabeticallyScorerRu
 

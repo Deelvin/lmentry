@@ -2,10 +2,10 @@ import pandas as pd
 
 from lmentry.constants import RESOURCES_RU_DIR
 from lmentry.scorers_ru.last_word_scorer_ru import LastWordScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class LastWordRu(LMentryTask):
+class LastWordRu(LMentryTaskRu):
 
     scorer_cls = LastWordScorerRu
 

@@ -1,8 +1,8 @@
 from lmentry.scorers_ru.word_containing_scorer_ru import WordContainingScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class WordContainingRu(LMentryTask):
+class WordContainingRu(LMentryTaskRu):
 
     scorer_cls = WordContainingScorerRu
 

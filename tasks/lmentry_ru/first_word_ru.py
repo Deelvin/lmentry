@@ -2,10 +2,10 @@ import pandas as pd
 
 from lmentry.constants import RESOURCES_RU_DIR
 from lmentry.scorers_ru.first_word_scorer_ru import FirstWordScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class FirstWordRu(LMentryTask):
+class FirstWordRu(LMentryTaskRu):
 
     scorer_cls = FirstWordScorerRu
 

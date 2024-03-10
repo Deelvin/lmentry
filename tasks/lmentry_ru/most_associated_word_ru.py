@@ -3,10 +3,10 @@ import random
 
 from lmentry.constants import RESOURCES_RU_DIR
 from lmentry.scorers_ru.most_associated_word_scorer_ru import MostAssociatedWordScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class MostAssociatedWordRu(LMentryTask):
+class MostAssociatedWordRu(LMentryTaskRu):
 
     scorer_cls = MostAssociatedWordScorerRu
 

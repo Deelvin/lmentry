@@ -7,10 +7,10 @@ from nltk.corpus import stopwords
 
 from lmentry.constants import RESOURCES_RU_DIR
 from lmentry.scorers_ru.word_after_scorer_ru import WordAfterScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class WordAfterRu(LMentryTask):
+class WordAfterRu(LMentryTaskRu):
 
     scorer_cls = WordAfterScorerRu
 

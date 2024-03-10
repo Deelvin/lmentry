@@ -1,10 +1,10 @@
 import random
 
-from lmentry.scorers.bigger_number_scorer_ru import BiggerNumberScorerRu
-from tasks.task import LMentryTask
+from lmentry.scorers_ru.bigger_number_scorer_ru import BiggerNumberScorerRu
+from tasks.task import LMentryTaskRu
 
 
-class BiggerNumberRu(LMentryTask):
+class BiggerNumberRu(LMentryTaskRu):
 
     scorer_cls = BiggerNumberScorerRu
 
@@ -80,4 +80,4 @@ class BiggerNumberRu(LMentryTask):
 
 if __name__ == '__main__':
     task = BiggerNumberRu()
-    # task.create_data()
+    task.create_data()

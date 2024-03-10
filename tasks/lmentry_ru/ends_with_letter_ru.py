@@ -1,8 +1,8 @@
 from lmentry.scorers_ru.ends_with_letter_scorer_ru import EndsWithLetterScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class EndsWithLetterRu(LMentryTask):
+class EndsWithLetterRu(LMentryTaskRu):
 
     scorer_cls = EndsWithLetterScorerRu
 

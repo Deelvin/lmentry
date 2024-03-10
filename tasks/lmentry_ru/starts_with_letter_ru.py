@@ -1,10 +1,8 @@
-import string
-
 from lmentry.scorers_ru.starts_with_letter_scorer_ru import StartsWithLetterScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class StartsWithLetterRu(LMentryTask):
+class StartsWithLetterRu(LMentryTaskRu):
 
     scorer_cls = StartsWithLetterScorerRu
 

@@ -3,10 +3,10 @@ import random
 
 from lmentry.constants import LMENTRY_WORDS_RU_PATH
 from lmentry.scorers_ru.sentence_not_containing_scorer_ru import SentenceNotContainingScorerRu
-from tasks.task import LMentryTask
+from tasks.task import LMentryTaskRu
 
 
-class SentenceNotContainingRu(LMentryTask):
+class SentenceNotContainingRu(LMentryTaskRu):
 
     scorer_cls = SentenceNotContainingScorerRu
 

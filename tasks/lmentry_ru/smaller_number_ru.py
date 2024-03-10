@@ -1,10 +1,10 @@
 import random
 
-from lmentry.scorers.smaller_number_scorer_ru import SmallerNumberScorerRu
-from tasks.task import LMentryTask
+from lmentry.scorers_ru.smaller_number_scorer_ru import SmallerNumberScorerRu
+from tasks.task import LMentryTaskRu
 
 
-class SmallerNumberRu(LMentryTask):
+class SmallerNumberRu(LMentryTaskRu):
 
     scorer_cls = SmallerNumberScorerRu
 
