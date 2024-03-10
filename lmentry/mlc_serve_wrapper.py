@@ -44,6 +44,7 @@ class MLCServeModelWrapper:
             "stop": stop_tokens,
             "top_p": self.top_p,
             "temperature": self.temperature,
+            "max_tokens": 512,
         }
 
         return payload
