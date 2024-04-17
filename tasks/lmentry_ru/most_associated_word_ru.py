@@ -13,22 +13,14 @@ class MostAssociatedWordRu(LMentryTaskRu):
     def __init__(self, name="most_associated_word_ru"):
         super().__init__(name)
 
-        self.canonical_template = \
-            'Q: Из слов {options}, какое слово более всего связано со словом "{category}"?\nA:'
-        self.second_template = 'Q: Какое слово более всего связано со словом "{category}" из слов {options}?\nA:'
-        self.third_template = \
-            'Из следующих слов выберите слово, которое более всего связано со словом "{category}" – {options}:\n'
-        self.fourth_template = 'Q: Из слов {options}, какое слово наиболее ассоциируется со словом "{category}"?\nA:'
-        self.fifth_template = 'Q: Какое слово наиболее ассоциируется со словом "{category}" из слов {options}?\nA:'
-        self.sixth_template = 'Из следующих слов выберите слово, которое наиболее ассоциируется со словом "{category}" – {options}:\n'
-        self.all_templates = [self.canonical_template, self.second_template, self.third_template, self.fourth_template,
-                              self.fifth_template, self.sixth_template]
+        with open("templates/most_associated_word_templates_ru.json", "r", encoding="utf8") as file:
+            self.all_templates = json.load(file)
         self.non_and_template_id = 2
         self.parameter_names = ["category", "answer"]
 
     def get_source_data(self):
 
-        with open(RESOURCES_RU_DIR.joinpath("nouns_by_category_ru.json")) as f:
+        with open(RESOURCES_RU_DIR.joinpath("nouns_by_category_ru.json"), encoding="utf8") as f:
             source_data = json.load(f)
         return source_data
 
@@ -41,7 +33,7 @@ class MostAssociatedWordRu(LMentryTaskRu):
         # create the string representation of the options
         options = [f"\"{option}\"" for option in options]
         if template_id != self.non_and_template_id:
-            options = ", ".join(options[:-1]) + f", и {options[-1]}"
+            options = ", ".join(options[:-1]) + f" и {options[-1]}"
         else:
             options = ", ".join(options)
         input_ = template.format(category=category, options=options)
@@ -119,4 +111,5 @@ class MostAssociatedWordRu(LMentryTaskRu):
 
 if __name__ == '__main__':
     task = MostAssociatedWordRu()
-    task.create_data()
+    # task.create_data()
+    print(random.randint(0, len(task.all_templates)))
