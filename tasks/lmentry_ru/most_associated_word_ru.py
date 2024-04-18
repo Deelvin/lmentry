@@ -112,4 +112,3 @@ class MostAssociatedWordRu(LMentryTaskRu):
 if __name__ == '__main__':
     task = MostAssociatedWordRu()
     # task.create_data()
-    print(random.randint(0, len(task.all_templates)))
