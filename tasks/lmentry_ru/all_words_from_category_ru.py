@@ -14,7 +14,7 @@ class AllWordsFromCategoryRu(LMentryTaskRu):
     def __init__(self, name="all_words_from_category_ru"):
         super().__init__(name)
 
-        with open("templates/all_words_from_category_templates_ru.json", "r", encoding="utf8") as file:
+        with open("./templates/all_words_from_category_templates_ru.json", "r", encoding="utf8") as file:
             self.all_templates = json.load(file)
         self.non_and_template_id = 2
         self.parameter_names = ["category"]
