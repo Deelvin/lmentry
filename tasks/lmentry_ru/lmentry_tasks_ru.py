@@ -3,11 +3,11 @@ import logging
 from pathlib import Path
 
 from lmentry.constants import TASKS_DATA_DIR
-# from tasks.lmentry_ru.all_words_from_category import AllWordsFromCategory
+from tasks.lmentry_ru. all_words_from_category_ru import AllWordsFromCategoryRu
 # from tasks.lmentry_ru.all_words_from_category_0_distractors import AllWordsFromCategory0Distractors
 # from tasks.lmentry_ru.all_words_from_category_1_distractors import AllWordsFromCategory1Distractors
 # from tasks.lmentry_ru.all_words_from_category_2_distractors import AllWordsFromCategory2Distractors
-# from tasks.lmentry_ru.any_words_from_category import AnyWordsFromCategory
+from tasks.lmentry_ru.any_words_from_category_ru import AnyWordsFromCategoryRu
 # from tasks.lmentry_ru.any_words_from_category_3_distractors import AnyWordsFromCategory3Distractors
 # from tasks.lmentry_ru.any_words_from_category_4_distractors import AnyWordsFromCategory4Distractors
 # from tasks.lmentry_ru.any_words_from_category_5_distractors import AnyWordsFromCategory5Distractors
@@ -53,8 +53,8 @@ core_tasks_ru = {
     "word_not_containing_ru": WordNotContainingRu,
     "most_associated_word_ru": MostAssociatedWordRu,
     "least_associated_word_ru": LeastAssociatedWordRu,
-    # "any_words_from_category_ru": AnyWordsFromCategory,
-    # "all_words_from_category_ru": AllWordsFromCategory,
+    "any_words_from_category_ru": AnyWordsFromCategoryRu,
+    "all_words_from_category_ru": AllWordsFromCategoryRu,
     "first_alphabetically_ru": FirstAlphabeticallyRu,
     "more_letters_ru": MoreLettersRu,
     "less_letters_ru": LessLettersRu,
