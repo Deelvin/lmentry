@@ -18,6 +18,7 @@ LMENTRY_WORDS_PATH = RESOURCES_DIR.joinpath("lmentry_words.json")
 LMENTRY_WORDS_RU_PATH = RESOURCES_RU_DIR.joinpath("lmentry_words_ru.json")
 RHYME_GROUPS_PATH = RESOURCES_DIR.joinpath("rhyme_groups.json")
 HOMOPHONES_PATH = RESOURCES_DIR.joinpath("homophones.csv")
+HOMOPHONES_RU_PATH = RESOURCES_RU_DIR.joinpath("homophones_ru.json")
 PHONETICALLY_UNAMBIGUOUS_WORDS_PATH = RESOURCES_DIR.joinpath("phonetically_unambiguous_words.json")
 
 
