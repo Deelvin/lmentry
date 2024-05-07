@@ -133,7 +133,9 @@ class LMentryScorer:
         patterns = [
             rf"Ответ{delimiter} {target}",
             rf"Правильный ответ{delimiter} {target}",
-            rf"Конечно! Вот ответ на ваш вопрос{delimiter} {target}"
+            rf"Конечно! Вот ответ на ваш вопрос{delimiter} {target}",
+            rf"Спасибо за вопрос!\n{target}",
+            rf"С удовольствием!\n{target}"
         ]
         return [p.format(target=target) for p in patterns]
 
