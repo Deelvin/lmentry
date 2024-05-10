@@ -199,7 +199,10 @@ class LMentryScorer:
         score, certainty = None, None
 
         # return certain 0 if the prediction contains no alphanumeric character
-        if not re.search(r"[^\W_]", prediction):  # we don't consider `_` to be alphanumeric
+        if not re.search(r"[а-яёА-ЯЁ0-9_]", prediction):  # we don't consider `_` to be alphanumeric
+            return 0, 1
+
+        if re.search(r"[a-zA-Z]", prediction):  # we don't want to have Latin symbols
             return 0, 1
 
         if re.match(rf"{answer}\.?$", prediction, flags=re.IGNORECASE):
