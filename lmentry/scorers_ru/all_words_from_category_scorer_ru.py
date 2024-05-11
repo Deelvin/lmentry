@@ -14,7 +14,7 @@ class AllWordsFromCategoryScorerRu(LMentryScorer):
     def get_base_patterns(self, answer, category, distractors, category_words):
         punct = r"(,|.)"
 
-        distractor = rf'\"{distractors}\"|{distractors}'
+        distractor = rf'["{distractors}"|{distractors}]'
 
         category_words = get_category_words(category_words)
 
@@ -30,7 +30,7 @@ class AllWordsFromCategoryScorerRu(LMentryScorer):
 
         return base_patterns + self.get_shared_patterns_ru(target=answer)
 
-    def category_regex(category):
+    def category_regex(self, category):
         conj = r"(или|и)"
 
         if category == "этнонимы":
@@ -100,7 +100,7 @@ class AllWordsFromCategoryScorerRu(LMentryScorer):
             return score, certainty
 
         category = metadata["category"]
-        category = AllWordsFromCategoryScorerRu.category_regex(category)
+        category = self.category_regex(category)
 
         base_patterns = self.get_base_patterns(answer, category, distractors, category_words)
         score, certainty = self.certainty_scorer(prediction, base_patterns)
@@ -127,10 +127,26 @@ if __name__ == "__main__":
 
     counter = 0
     for key in predictions_keys:
-        if counter > 5:
+        if counter > 0:
             break
         examples_new = [ex for k, ex in examples.items() if k == key]
         pred = scorer.score_prediction(prediction=predictions[key]['prediction'], example=examples_new[0])
-        print("EXAMPLE:", examples_new[0], "ANSWER:", predictions[key]['prediction'], "ACC-CERT:", pred)
+        print("EXAMPLE:", examples_new[0]["input"], "ANSWER:", predictions[key]['prediction'], "ACC-CERT:", pred)
         print()
         counter += 1
+
+    prediction = """
+да, все слова из списка относятся к категории "транспортные средства":
+
+* "такси" - такси является транспортным средством.
+* "сани" - "сани" может быть обозначением для саней, которые также являются транспортным средством.
+* "трактор" - трактор является транспортным средством.
+* "рябина" - "рябина" не является транспортным средством и не относится к этой категории.
+* "автобус" - автобус является транспортным средством.
+
+таким образом, все слова из списка относятся к категории "транспортные средства".
+"""
+
+    pattern = r"нет(,|.) категория (транспорты|транспортом|транспортов|транспортных средствах|транспортных средств|транспортными средствами|транспортным средством|транспортным средствам|транспортные средства|транспортному средству|транспортном средстве|транспортное средство|транспортного средства|транспорте|транспортах|транспортами|транспорта|транспорт) не включает слова \"рябина\"|рябина."
+
+    print("MATCH:", re.search(pattern, prediction))

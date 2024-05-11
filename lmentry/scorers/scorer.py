@@ -253,7 +253,9 @@ class LMentryScorer:
                 break
             elif re.search(pattern, prediction):
                 score = 1
+                print("PATTERN:", pattern, "\n")
 
+        print("PREDICTION TO ANALYSIS:\n", prediction, "\n")
         return score, certainty
 
     def negative_scorer(self, prediction, answer):
