@@ -11,8 +11,7 @@ class AllWordsFromCategoryScorerRu(LMentryScorer):
     def __init__(self):
         super().__init__()
 
-    def get_base_patterns(self, category, distractors, category_words):
-        answer = r"(да|нет)"
+    def get_base_patterns(self, answer, category, distractors, category_words):
         punct = r"(,|.)"
 
         distractor = rf'\"{distractors}\"|{distractors}'
@@ -80,13 +79,16 @@ class AllWordsFromCategoryScorerRu(LMentryScorer):
 
         metadata = example["metadata"]
         dstr = metadata["distractors"]
+        print("DISTRACTOR:", dstr)
         if dstr:
             distractors = dstr[0]
         else:
             distractors = ''
 
         category_words = metadata["category_words"]
+        print("DISTRACTORS NUM:", metadata["num_distractors"])
         answer = "да" if metadata["num_distractors"] == 0 else "нет"
+        print("ANSWER TEMPLATE:", answer)
 
         score, certainty = self.negative_scorer_ru(prediction, answer)
         if score is not None:
@@ -100,9 +102,7 @@ class AllWordsFromCategoryScorerRu(LMentryScorer):
         category = metadata["category"]
         category = AllWordsFromCategoryScorerRu.category_regex(category)
 
-        words = metadata["words"]
-
-        base_patterns = self.get_base_patterns(category, distractors, category_words)
+        base_patterns = self.get_base_patterns(answer, category, distractors, category_words)
         score, certainty = self.certainty_scorer(prediction, base_patterns)
 
         return score, certainty
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     counter = 0
     for key in predictions_keys:
-        if counter > 10:
+        if counter > 5:
             break
         examples_new = [ex for k, ex in examples.items() if k == key]
         pred = scorer.score_prediction(prediction=predictions[key]['prediction'], example=examples_new[0])

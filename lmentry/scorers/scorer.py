@@ -249,6 +249,7 @@ class LMentryScorer:
             if re.match(pattern + r"\.?$", prediction):
                 score = 1
                 certainty = 1
+                print("PATTERN:", pattern, "\n")
                 break
             elif re.search(pattern, prediction):
                 score = 1
