@@ -125,7 +125,12 @@ if __name__ == "__main__":
 
     scorer = AllWordsFromCategoryScorerRu()
 
+    counter = 0
     for key in predictions_keys:
+        if counter > 10:
+            break
         examples_new = [ex for k, ex in examples.items() if k == key]
         pred = scorer.score_prediction(prediction=predictions[key]['prediction'], example=examples_new[0])
-        print(pred)
+        print("EXAMPLE:", examples_new[0], "ANSWER:", predictions[key]['prediction'], "ACC-CERT:", pred)
+        print()
+        counter += 1
