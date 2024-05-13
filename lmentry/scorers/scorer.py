@@ -244,18 +244,16 @@ class LMentryScorer:
     def certainty_scorer(self, prediction, base_patterns):
         score, certainty = 0, 0
 
-        for i, pattern in enumerate(self.get_patterns(base_patterns)):
+        for i, pattern in enumerate(base_patterns):
             pattern = self.normalize_string(pattern)
+
             if re.match(pattern + r"\.?$", prediction):
                 score = 1
                 certainty = 1
-                print("PATTERN:", pattern, "\n")
                 break
             elif re.search(pattern, prediction):
                 score = 1
-                print("PATTERN:", pattern, "\n")
 
-        print("PREDICTION TO ANALYSIS:\n", prediction, "\n")
         return score, certainty
 
     def negative_scorer(self, prediction, answer):
