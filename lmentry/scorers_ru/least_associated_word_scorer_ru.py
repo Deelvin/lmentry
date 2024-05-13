@@ -3,6 +3,8 @@ import re
 from pathlib import Path
 
 from lmentry.scorers.scorer import LMentryScorer
+from lmentry.scorers_ru.metadata.least_associated_word.metadata import get_words
+from lmentry.scorers_ru.metadata.least_associated_word.extra_patterns import get_extra_patterns
 
 
 class LeastAssociatedWordScorerRu(LMentryScorer):
@@ -13,292 +15,24 @@ class LeastAssociatedWordScorerRu(LMentryScorer):
 
     def get_base_patterns(self, answer, category, words, distractors):
 
-        words = self.get_punctuation(words)
-        distractors = self.get_punctuation(distractors)
+        words = get_words(words)
+        distractors = get_words(distractors)
+
+        extra_patterns = get_extra_patterns(words, answer, distractors, category)
 
         base_patterns = [
-            rf"из предложенных слов, {answer} является наименее близкой к категории \"{category} и {category}\".",
-            rf"из выбранных слов, {answer} является наименее близким к категории {category}.",
-            rf"из выбранных слов, {answer} не является {category}. остальные слова ({distractors}) являются {category}.\nтаким образом, наименьшее соотношение с категорией {category} имеет слово {answer}.",
-            rf"из предложенных слов, {answer} имеет наименьшее сходство с категорией {category}.",
-            rf"из выбранных слов, {answer} наименее близко к категории {category}.",
-            rf"из предложенных слов, {answer} будет в наименьшей степени близко к категории {category}.",
-            rf"из выбранных слов, {answer} имеет наименьшее сходство с категорией {category}.",
-            rf"из предложенных вариантов, слово {answer} имеет наименьшее отношение к категории {category}.\n\nтаким образом, ответ на вопрос - {answer}.",
-            rf"из предложенных вариантов, {answer} является наименее близким к категории {category}.\n\n{distractors} являются {category}, а {answer} - нет.",
-            rf"из предложенных слов, только {answer} имеет минимальное сходство с категорией {category}.\n{distractors} не являются {category}.",
-            rf"из предложенных вариантов, {answer} имеет наименьшее отношение к категории {category}.\nтаким образом, выберите {answer}.",
-            rf"слово {answer} не имеет отношения к категории {category}. остальные слова ({distractors}) все относятся к этой категории.",
-            rf"слово {answer} имеет минимальную связь с категорией {category} из выбранных слов.",
-            rf"из предложенных слов, наименее соотносимое с категорией {category} является {answer}.\n\nвсе остальные слова ({distractors}) являются {category}.",
-            rf"из предложенных слов, наименее согласовано с категорией {category} является {answer}.",
-            rf"слово {answer} согласуется с категорией {category} в наименьшей степени, так как оно не является {category}.\n{distractors} являются {category}, а {answer} - нет.",
-            rf"из предложенных слов, наименее связано с категорией {category} слово {answer}. этот термин не является названием {category} и не имеет никакого отношения к категории {category}.",
-            rf"слово {answer} имеет минимальное отношение к категории {category} из выбранных вариантов.",
-            rf"из предложенных слов, наименее связанным с категорией {category} является {answer}.",
-            rf"слово {answer} наименее согласуется с категорией {category}, так как {answer} не является {category}.\nтаким образом, наиболее подходящим ответом является {answer}.",
-            rf"из слов категории {category} не близка категория {answer}.",
-            rf"слово {answer} относится к категории {category} наименее.\nостальные слова - {distractors} - все относятся к категории {category}.",
-            rf"слово {answer} не связано с категорией {category}.\n\nтаким образом, из выбранных слов, минимальное слово, связанное с категорией {category}, является {answer}.",
-            rf"слово {answer} не соотносимо с категорией {category}, так как {answer} - это {category}, а не {category}.",
-            rf"слово {answer} является наименее соотносимым с категорией {category} из предложенных вариантов. остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} имеет наименьшее сходство с категорией {category} из указанных вариантов. остальные слова: {distractors} являются {category}.",
-            rf"слово {answer} ассоциируется с категорией {category} в наименьшей степени.\nслова {distractors} не являются {category} и не связаны с этой категорией.",
-            rf"слово {answer} не имеет связи с категорией {category}. остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} соотносится с категорией {category} в наименьшей степени, так как {answer} - это {category}, а не {category}.",
-            rf"слово {answer} имеет минимальное сходство с категорией {category} из указанных вариантов.\nостальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} имеет меньшую связь с категорией {category}.",
-            rf"из предложенных вариантов, наименее согласуется с категорией {category} слово {answer}.",
-            rf"слово {answer} наименее соответствует категории {category} из предложенных вариантов. остальные слова ({distractors}) являются различными типами {category}.",
-            rf"слово {answer} является наименьшим согласным с категорией {category} из указанных вариантов.\n{distractors} являются {category}, а {answer} - нет.",
-            rf"наименее ассоциировано с категорией {category} слово {answer}. остальные слова ({distractors}) более ассоциируются с категорией {category}.",
-            rf"из выбранных слов, {answer} не является {category}.",
-            rf"наименее согласовано с категорией {category} является слово {answer}.",
-            rf"из предложенных слов, наименьшее согласие с категорией {category} имеет слово {answer}.",
-            rf"из предложенных слов, наименьшее отношение к категории {category} имеет слово {answer}. остальные слова ({distractors}) являются различными типами {category}.",
-            rf"из предложенных слов, наиболее связанным с категорией {category} является {answer}.",
-            rf"{answer}.\nвсе другие слова ({distractors}) являются типами {category}.",
-            rf"из предложенных слов, наименьшей степени относящееся к категории {category} является {answer}.",
-            rf"{answer} имеет минимальную связь с категорией {category} из выбранных вариантов.\nостальные варианты ({distractors}) являются {category}.",
-            rf"слово {answer} является наименее согласным с категорией {category} из предложенных вариантов. остальные слова ({distractors}) являются {category}.",
-            rf"из предложенных слов, наиболее тесно связанное с категорией {category} является {answer}.",
-            rf"слово {answer} является минимально связанным с категорией {category} из выбранных слов.",
-            rf"из предложенных слов, {answer} наиболее связан с категорией {category}.",
-            rf"категория {category} согласована минимально словом {answer}.\n\nостальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} имеет наименьшую связь с категорией {category}.",
-            rf"слово {answer} не является {category}.\nслова {distractors} все являются {category}.",
-            rf"из предложенных слов, наименьшее соотношение с категорией {category} имеет слово {answer}.",
-            rf"из предложенных вариантов, только {answer} не связано с категорией {category}. остальные слова ({distractors}) являются типами {category}.",
-            rf"из предложенных вариантов, {answer} ассоциируется с категорией {category} в наименьшей степени.",
-            rf"из предложенных вариантов, категория {category} ассоциируется с {answer} в наименьшей степени.",
-            rf"из выбранных слов, {answer} не является {category}. остальные слова ({distractors}) являются разными типами {category}. поэтому выбор падает на {answer}, который не является {category}.",
-            rf"из выбранных слов, {answer} не согласуется с категорией {category}, так как {answer} - это {answer}, а не {category}.\nтаким образом, выберите {answer}.",
-            rf"слово {answer} не является близким к категории {category}. остальные слова ({distractors}) являются близкими к этой категории.",
-            rf"из предложенных слов, {answer} относится к категории {answer}, а не \"{category} и {category}\", поэтому выберите {answer}.",
-            rf"из предложенных слов, {answer} соответствует категории {category}, так как {answer} является {category}.\nследовательно, выберите {answer}.",
-            rf"из предложенных слов, наименьшее согласование с категорией {category} имеет слово {answer}.",
-            rf"из предложенных слов, наименьшее связность с категорией {category} имеет слово {answer}.",
-            rf"из выбранных слов, {answer} не является {category}. остальные слова ({distractors}) являются {category}.\nтаким образом, выберите {answer}.",
-            rf"из выбранных слов, {answer} наиболее отдален от категории {category}.",
-            rf"из предложенных вариантов, наименьшее слово, связанное с категорией {category}, является {answer}.",
-            rf"из слов {words} не имеет отношения слово {answer}.\n\nслово {answer} не является {category} и не входит в категорию {category}.",
-            rf"из слов, указанных в вопросе, только {answer} не относится к категории {category}.\n\n{distractors} все являются {category}.",
-            rf"категория {category} согласована менее всего словом {answer}.\n\nвсе остальные слова ({distractors}) являются типами {category}, то есть они являются разными видами {category}.",
-            rf"слово {answer} относится в наименьшей степени к категории {category}.",
-            rf"из предложенных слов, наименьшую связь с категорией {category} имеет слово {answer}.",
-            rf"из предложенных слов, слово {answer} имеет минимальное сходство с категорией {category}.",
-            rf"слово {answer} не является одним из выбранных слов, поэтому минимальное отношение к категории {category} имеет слово {answer}.",
-            rf"{answer}.\nслово {answer} не является {category} и не связано с этой категорией.",
-            rf"{answer} является наименее соотносимым с категорией {category} из всех указанных слов.",
-            rf"{answer} не имеет связи с категорией {category}.",
-            rf"слово {answer} не согласуется с категорией {category}, так как {answer} - это не {category}, а также не {category}. остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} является минимально близким к категории {category}.",
-            rf"из выбранных слов, {answer} ассоциируется с категорией {category} наименьшей степени.\n{answer} - это не{category}, это насекомое, поэтому оно не может быть отнесено к категории {category}.",
-            rf"слово {answer} является менее согласным с категорией {category} из предложенных вариантов.\nотличие от других слов заключается в том, что {answer} не является {category}.",
-            rf"из предложенных слов, наименьшее ассоциативное связность с категорией {category} имеет слово {answer}.",
-            rf"слово {answer} в наименьшей степени согласуется с категорией {category} из предложенных вариантов.",
-            rf"{answer} является наименее связанным с категорией {category} из выбранных слов. остальные слова ({distractors}) являются {category}.",
-            rf"из предложенных вариантов, {category} {answer} имеет минимальное отношение к категории {category}.",
-            rf"из предложенных слов, {category} связана только с {answer}.",
-            rf"из выбранных слов, {answer} не относится к категории {category}.",
-            rf"из выбранных слов, {answer} не связан с категорией {category}.\n\nтаким образом, выберите {answer}.",
-            rf"из выбранных слов, {answer} не является {category}, так как {answer} - это {answer}, а не {category}.\nтаким образом, выберите {answer}, так как это слово не является {category}.",
-            rf"слово {category} имеет наибольшее сходство с категорией {answer}.",
-            rf"{answer}.\nостальные слова ({distractors}) являются {category}.",
-            rf"{answer}.\n{distractors} все являются {category}, но {answer} не является таковым.",
-            rf"слово {answer} является менее всего относящимся к категории {category}.",
-            rf"слово {answer} в наименьшей степени соответствует категории {category}, потому что все остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} не согласуется с категорией {category} из предложенных вариантов. остальные слова ({distractors}) являются {category}.",
-            rf"{answer} не является {category}. остальные слова ({distractors}) являются {category}.",
-            rf"{answer} не имеет отношения к категории {category}.",
-            rf"слово {answer} не согласуется с категорией {category}, так как {answer} - это {category}.\nследовательно, менее всего согласуется с категорией {category} слово {answer}.",
-            rf"слово {answer} не согласуется с категорией {category}, так как {answer} - это {answer}, а не {category}.\nследовательно, несогласующим словом является {answer}.",
-            rf"слово {answer} не согласуется с категорией {category} из выбранных вариантов. остальные слова ({distractors}) являются типами {category}.",
-            rf"из предложенных слов, {answer} будет иметь минимальное отношение к категории {category}.",
-            rf"слово {answer} не имеет никакого отношения к категории {category}.\n\nостальные слова - {distractors} - все являются {category}.",
-            rf"из предложенных слов, {distractors} являются {category}, а {answer} - нет.\nтаким образом, сходство между этими словами и категорией {category} есть.",
-            rf"из предложенных слов, наиболее отдален от категории {category} является {answer}. остальные слова ({distractors}) являются разными типами {category}.",
-            rf"{answer} не согласуется с категорией {category}.",
-            rf"слово {answer} не относится к категории {category}.\n\nв наименьшей степени слово {answer} относится к категории {category}, так как все остальные слова являются {category}.",
-            rf"из предложенных слов, {answer} наименьше ассоциируется с категорией {category}.",
-            rf"из предложенных слов, наименее соответствовало категории {category} слово {answer}.\n\nвсе остальные слова ({distractors}) являются {category}.",
-            rf"из выбранных слов, {answer} не ассоциируется с категорией {category}.",
-            rf"слово {answer} не согласуется с категорией {category} из выбранных вариантов.",
-            rf"из предложенных вариантов, слово {answer} является минимально связанным с категорией {category}.",
-            rf"слово {answer} является наименьшим соотносителем с категорией {category} из предложенных вариантов.",
-            rf"из слов {category} не имеет отношения слово {answer}.",
-            rf"из предложенных вариантов, минимально ассоциируется {answer} с категорией {category}.",
-            rf"из слов {words} {category}, которое относится к категории {category} наименее, является {answer}.",
-            rf"из предложенных вариантов, {answer} соответствует в наименьшей степени категории {category}.\n\nвсе остальные слова: {distractors} не являются {category}.",
-            rf"из выбранных слов, {answer} соответствует в наименьшей степени категории {category}.",
-            rf"слово {answer} соотносится в наименьшей степени с категорией {category} из предложенных вариантов. остальные слова ({distractors}) являются действительно {category}ными объектами.",
-            rf"из слов категории {category}, наименее соответствующим для слова {answer} является {answer}.",
-            rf"из выбранных слов, {answer} не является близким к категории {category}.",
-            rf"из выбранных слов, {answer} не относится к категории {category}. {distractors} являются {category}.",
-            rf"из выбранных слов, {answer} не соответствует категории {category}.",
-            rf"из выбранных слов, {answer} не имеет связи с категорией \"{category} и {category}\".",
-            rf"из выбранных слов, {answer} не ассоциируется с категорией \"{category} и {category}\". {distractors} являются типами {category}.",
-            rf"из выбранных слов, {answer} не является {category}, так как это не {category}, а также не имеет отношения к категории {category}. поэтому выбор падает на {answer}.",
-            rf"слово {answer} имеет минимальное отношение к категории {category}.",
             rf"{answer}.",
-            rf"слово {category} имеет минимальное сходство с категорией {answer}.",
-            rf"{answer} имеет минимальное сходство с категорией {category}.",
-            rf"из выбранных слов, наименее согласуется с категорией {category} слово {answer}.\n\nвсе остальные слова ({distractors}) являются {category}.",
-            rf"наименее согласуется с категорией {category} слово {answer}.",
-            rf"слово {answer} является наименее согласующимся с категорией {category} из предложенных вариантов. остальные слова ({distractors}) являются {category}.",
-            rf"из выбранных слов, наименее связано с категорией {category} является {answer}.",
-            rf"{answer}.\nслово {answer} не является типом {category}, так как оно обозначает сосуд для приготовления пищи.",
-            rf"слово {answer} не ассоциируется с категорией {category}.",
-            rf"слово {answer} не соотносится с категорией {category}.",
-            rf"слово {answer} не согласуется с категорией {category}.",
-            rf"слово {answer} не относится к категории {category}. остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} не относится к категории {category}.",
-            rf"слово {answer} не соответствует категории {category}.",
-            rf"{answer} не связано с категорией {category}.",
-            rf"слово {answer} не согласовано с категорией {category}.",
-            rf"слово {answer} минимально согласуется с категорией {category}.",
-            rf"из предложенных слов, {answer} минимально согласуется с категорией {category}.",
-            rf"минимально согласуется с категорией {category} слово {answer}.",
-            rf"слово {answer} является минимально относящимся к категории {category} из выбранных вариантов.\nвсе остальные слова ({distractors}) не являются {category}.",
-            rf"слово {answer} является минимальным словом из указанных вариантов, которое относится к категории {category}.",
-            rf"{answer}.\nостальные слова ({distractors}) не являются {category}.",
-            rf"слово {answer} минимально согласовано с категорией {category}.",
-            rf"минимально согласовано с категорией {category} является слово {answer}.",
-            rf"минимально близко к категории {category} из предложенных слов является {answer}.",
-            rf"слово {answer} не согласуется с категорией {category}. остальные слова ({distractors}) являются различными типами {category}.",
-            rf"{answer}.\nмежду тем, все другие слова в списке ({distractors}) являются {category} или {category}.",
-            rf"{answer} наименее соответствует категории {category}.",
-            rf"слово {answer} в наименьшей степени ассоциируется с категорией {category}.",
-            rf"{answer}.\nслово {answer} наименее ассоциируется с категорией {category}.",
-            rf"из предложенных слов, {answer} наименьшей степени ассоциируется с категорией {category}.",
-            rf"{answer}.\nв наименьшей степени ассоциируется с категорией {category} потому, что {answer} - это не{category} существо, а остальные слова ({distractors}) - это все {category}.",
-            rf"из предложенных слов, наименьшей ассоциации с категорией {category} имеет {answer}.",
-            rf"слово {answer} соотносится с категорией {category} в наименьшей степени. остальные слова ({distractors}) являются типичными {category}ными объектами.",
-            rf"из предложенных вариантов, {answer} в наименьшей степени согласуется с категорией {category}.",
-            rf"слово {answer} в наименьшей степени согласуется с категорией {category}.",
-            rf"{answer}.\nв наименьшей степени {answer} относится к категории {category}, потому что {answer} не является типом {category}. {distractors} являются типами {category}.",
-            rf"слово {answer} является наименьшим в отношении категории {category} из выбранных вариантов.",
-            rf"{answer}.\nв наименьшей степени {answer} соотносится с категорией {category}, так как он не является {category}.",
-            rf"слово {answer} не согласуется с категорией {category}. остальные слова ({distractors}) являются типами {category}.",
-            rf"{answer} имеет наименьшее отношение к категории {category} из предложенных вариантов.",
-            rf"{answer} имеет минимальное отношение к категории {category}.",
-            rf"{answer} наименее ассоциируется с категорией {category}.",
-            rf"{answer} наименее соотносится с категорией {category}.\n\n{distractors} являются {category}, а {answer} - {category}.",
-            rf"{answer} является наименее согласующимся с категорией {category} из всех предложенных слов.\nтаким образом, ответ на ваш вопрос будет: {answer}.",
-            rf"наименее относится к категории {category} слово {answer}. {answer} - это {category}, а не {category}.",
-            rf"{answer} наименее связан с категорией {category}.\n\nвсе остальные слова ({distractors}) являются {category}.",
-            rf"{answer} является наименее согласовано с категорией {category} из этих слов.\nвсе остальные слова ({distractors}) являются {category} и соответствуют этой категории.",
-            rf"{answer} является наименее близким к категории {category} из выбранных слов.\nтаким образом, ответ на ваш вопрос будет: {answer}.",
-            rf"{answer} не имеет сходства с категорией {category}.",
-            rf"{answer} не ассоциируется с категорией {category}.",
-            rf"{answer} не соотносится с категорией {category}.",
-            rf"слово {answer} не согласовано с категорией {category}.\n\n{distractors} являются {category}, а {answer} - нет.",
-            rf"слово {answer} минимально ассоциируется с категорией {category}.",
-            rf"слово {answer} является минимально согласующимся с категорией {category}.",
-            rf"минимально связано с категорией {category} является слово {answer}.\n\nвсе остальные слова ({distractors}) являются {category} и связаны с этой категорией.",
-            rf"слово {answer} является минимально согласовано с категорией {category}.",
-            rf"{answer} является наименее согласным с категорией {category} из всех указанных слов.\nтаким образом, ответ на ваш вопрос будет: {answer}.",
-            rf"наименьшей степени ассоциируется с категорией {category} слово {answer}.",
-            rf"{answer}.\n{distractors} являются {category}, а {answer} - это не {category}.",
-            rf"из предложенных слов, {answer} не согласуется с категорией {category}.\n\n{distractors} являются {category}, которые соответствуют этой категории.",
-            rf"{answer} является наименее связанным с категорией {category} из предложенных слов.\nтаким образом, ответ на ваш вопрос будет: {answer}.",
-            rf"{answer} не относится к категории {category}.\n\nвсе остальные слова ({distractors}) являются {category}.",
-            rf"{answer} наименее относится к категории {category}.",
-            rf"ответ: {answer}.\n\nнекоторые из перечисленных слов {distractors} являются {category}, а {answer} - это термин, который не имеет отношения к категории {category}.",
-            rf"ответ: {answer}.\n\n{distractors} являются {category}, а {answer} - это термин, который не имеет отношения к категории {category}.",
-            rf"{answer} относится к категории {category}, а остальные слова ({distractors}) относятся к категории {category}.",
-            rf"{answer} не относится к категории {category}.",
-            rf"слово {answer} является не близким к категории {category}. остальные слова ({distractors}) являются близкими к этой категории.",
-            rf"{answer} не соответствует категории {category}.\n\nвсе другие слова ({distractors}) являются типами {category}.",
-            rf"из выбранных слов, {answer} будет наименее согласовано с категорией {category}.",
-            rf"{answer} не будет иметь отношения к категории {category}.\n\nвсе другие слова ({distractors}) являются типами {category}.",
-            rf"из предложенных слов, минимально согласовано с категорией {category} будет слово {answer}.",
-            rf"из предложенных слов, {answer} наименее относится к категории {category}, так как это слово не является типом {category}.\n{distractors} все являются типами {category}.",
-            rf"из предложенных слов, наименее соответствовать категории {category} является слово {answer}.\n\nвсе остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} не было связано с категорией {category}.",
-            rf"слово {answer} не было согласовано с категорией {category}.",
-            rf"из предложенных слов, {answer} является минимально соотносимым с категорией {category}.",
-            rf"из предложенных слов, {answer} наименьшей степени ассоциируется с категорией {category}.\n\n{answer} - это {category}, а не {category}.",
-            rf"из предложенных слов, {answer} наименьшей степени согласуется с категорией {category}, так как {answer} - это {category}, а остальные слова ({distractors}) не являются {category}.",
-            rf"из предложенных слов, {answer} было наименьшим согласовано с категорией {category}.",
-            rf"из предложенных вариантов, {answer} имеет минимальное отношение к категории {category}.",
-            rf"{answer}",
-            rf"{answer} является {category}, поэтому оно наименее относится к категории {category} из выбранных вариантов.\nответ: {answer}",
-            rf"ответ: {answer} не имеет связи с категорией {category} из {distractors}.",
-            rf"слово {answer} является {category} и имеет связь с категорией {category}.",
-            rf"слово {answer} не соотносится с категорией {category} из выбранных вариантов. остальные слова ({distractors}) являются типичными {category}.",
-            rf"слово {answer} не соотносится с категорией {category} из выбранных вариантов. остальные слова ({distractors}) являются {category} в русском языке.",
-            rf"слово {answer} не согласуется с категорией {category} из выбранных вариантов. остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} не согласуется с категорией {category} из приведенных вариантов. остальные слова ({distractors}) являются {category}.",
-            rf"из выбранных вариантов, слово {answer} не является {category}. остальные слова ({distractors}) являются {category}.",
-            rf"слово, которое минимально согласуется с категорией {category} из предложенных вариантов, является {answer}.",
-            rf"минимально относящееся к категории {category} из выбранных слов является {answer}.",
-            rf"из предложенных вариантов, наименьшим относящимся к категории {category} является {answer}.",
-            rf"слово, которое минимально соответствует категории {category} из указанных вариантов, является {answer}.\n\nвсе другие слова ({distractors}) не являются {category}.",
-            rf"из всех выбранных слов, {answer} является минимально связанным с категорией {category} из {words}.",
-            rf"из предложенных слов, наименьшим количеством согласных с категорией {category} является {answer}.\n\nответ: {answer}",
-            rf"{answer} является наименее сопоставимым с категорией {category} из выбранных вариантов.\nтаким образом, наиболее правильным ответом является {answer}.",
-            rf"из предложенных слов, наименьшее ассоциирование с категорией {category} имеет слово {answer}.",
-            rf"слово {answer} не соотносится с категорией {category} из предложенных вариантов.\n{category} из этого списка являются:\n* {distractors}\n* {distractors}\n* {distractors}\n* {distractors}",
-            rf"слово {answer} не соотносится с категорией {category} из предложенных вариантов. остальные слова ({distractors}) являются {category}.",
-            rf"слово {answer} не согласуется с категорией {category} из приведенных вариантов. остальные слова ({distractors}) являются {category} и соответствуют этой категории.",
-            rf"слово {answer} не относится к категории {category}.\n\nвсе остальные слова ({distractors}) являются типами {category}.",
-            rf"слово {answer} не относится к категории {category}.\n\nтаким образом, из выбранных вариантов, наименьшей степени относящейся к категории {category} является {answer}.",
-            rf"из предложенных вариантов, {answer} не является {category}. {distractors} являются {category}, поэтому наименьшей степенью соответствия категории {category} является {answer}.",
-            rf"{answer}.\nв этом случае, {answer} является наименьшим согласным с категорией {category} из предложенных вариантов.",
-            rf"из предложенных слов, наименьшей степенью согласовано с категорией {category} является {answer}.",
-            rf"к слову {answer} имеет наименьшее отношение категория {category}.",
-            rf"из предложенных слов, {answer} имеет наименьшую связь с категорией {category}. остальные слова ({distractors}) являются различными типами {category}.",
-            rf"из слов {words} наименьшее отношение к категории {category} имеет слово {answer}.",
-            rf"из слов {words}, меньшее отношение к категории {category} имеет слово {answer}.",
-            rf"из слов категории {category}, меньшее отношение к категории {category} имеет слово {answer}.",
-            rf"из слов {category} и {words}, наименьшее отношение имеет слово {answer}.",
-            rf"из предложенных слов, наименее связана категория {category} с {answer}.",
-            rf"следующая категория {category} наименее согласована с словом {answer}.\n\nвсе остальные слова ({distractors}) являются {category}, но {answer} - это не {category}.",
-            rf"из предложенных вариантов, наименее близкое к категории {category} слово {answer}.\n\nвсе остальные слова ({distractors}) являются различными типами {category}.",
-            rf"из предложенных вариантов, наименее близка к категории {category} является {answer}.",
-            rf"{distractors} являются типами {category}, а {answer} - нет.\nтаким образом, из слов категории {category} не имеет отношения {answer}.",
-            rf"{distractors} не являются {category}, поэтому с ними категория {category} не ассоциируется.",
-            rf"слово {answer} не относится к категории {category}.\n\nв категории {category} могут быть представлены следующие слова:\n\n* {distractors}\n* {distractors}\n* {distractors}\n* {distractors}",
-            rf"слово {answer} не соответствует категории {category}. остальные слова - {distractors} - соответствуют этой категории.",
-            rf"из слов {category} ассоциируется минимально {answer}.",
-            rf"слово {answer} не согласуется с категорией {category}.\n\n{distractors} - все эти слова являются типичными словами, которые относятся к категории {category}.",
-            rf"минимально из слов категории {category} относится слово {answer}.",
-            rf"минимально из этих вариантов {category} {answer} относится к категории {category}.",
-            rf"минимально {answer} соответствует категории {category}.",
-            rf"из слов {category} соотносимо слово {answer} минимально. остальные слова ({distractors}) не являются {category}.",
-            rf"минимальное согласование категории {category} в данном случае является словом {answer}.\n\nвсе другие слова ({distractors}) не являются согласованными с ними.",
-            rf"из слов категории {category} ассоциируется менее всего с {answer}.",
-            rf"слово {answer} не согласуется с категорией {category} вовсе.\nостальные слова ({distractors}) являются {category}, поэтому они согласуются с этой категорией.",
-            rf"из слов категории {category} связана с ними наименее {answer}.",
-            rf"из слов {words} категория {category} связана наименее словом {answer}.",
-            rf"категория {category} связана менее всего с словом {answer}.",
-            rf"слово {answer} соотносимо с категорией {category} наименее, так как {answer} - это не{category} существо, а не {category}.",
-            rf"слово {answer} не является частью категории {category}. остальные слова - {distractors} - являются {category} и соответственно согласованы с категорией {category}.",
-            rf"из слов категории {category} близка менее всего к {answer} является {answer}.",
-            rf"слово {answer} ассоциируется в наименьшей степени с категорией {category} из предложенных вариантов. остальные слова ({distractors}) более связаны с этой категорией.",
-            rf"из предложенных слов, {answer} связан с категорией {category} в наименьшей степени.\n{answer} - это транспортное средство, а не {category}, поэтому оно не связано с этой категорией.",
-            rf"из предложенных слов, {answer} связана с категорией {category} в наименьшей степени. остальные слова ({distractors}) не являются {category}.",
-            rf"из предложенных слов, {answer} согласована в наименьшей степени с категорией {category}.",
-            rf"из предложенных вариантов, наиболее отдаленным от категории {category} является {answer}.\n\n{distractors} все являются различными видами {category}, поэтому они близки этой категории.",
-            rf"из предложенных слов, {category} имеет наименьшее отношение к {answer}.",
-            rf"{answer} является то, что менее всего соответствует категории {category}, по сравнению с другими вариантами. остальные слова ({distractors}) являются {category}.",
-            rf"из выбранных слов, {answer} является минимальным отношением к категории {category}.\n\nтаким образом, выберите {answer}.",
-            rf"из выбранных слов, {category} имеет наибольшее сходство с {answer}.",
-            rf"{answer} является наименее ассоциированным с категорией {category} из выбранных слов. остальные слова ({distractors}) являются {category}.",
-            rf"из предложенных слов, {answer} не является {category}, так как это {answer} - это {answer}, а не {category}.\nтаким образом, выберите {answer}.",
-            rf"из выбранных слов, {answer} не является {category}, так как это не {category}.\nтаким образом, выбор падает на {answer}.",
-            rf"из выбранных слов, {answer} не относится к категории {category}. {distractors} все относятся к категории {category}.",
-            rf"из выбранных слов, {answer} не является {category}.\nтаким образом, выберите {answer}, который не связан с категорией {category}.",
-            rf"из выбранных слов, {answer} не является {category}. остальные слова ({distractors}) являются разными типами {category}.\nтаким образом, выберите {answer}, который не является {category}.",
-            rf"из выбранных слов, {answer} не является {category}. остальные слова ({distractors}) являются разными типами {category}.\nтаким образом, выберите {answer}.",
-            rf"из предложенных слов, минимально ассоциируется с категорией {category} слово {answer}."
+            rf"{answer},",
+            rf"^{answer}\b",
         ]
 
-        return base_patterns + self.get_shared_patterns(target=answer)
+        base_patterns.extend(extra_patterns)
 
-    def category_regex(category):
+        return base_patterns + self.get_shared_patterns_ru(target=answer)
+
+    def category_regex(self, category):
         conj = r"(или|и)"
+
         if category == "этнонимы":
             category = rf"(этнонимы|этнониму|этнонимом|этнонимов|этнониме|этнонимах|этнонимами|этнонимам|этнонима|этноним)"
         elif category == "имена родства":
@@ -344,15 +78,18 @@ class LeastAssociatedWordScorerRu(LMentryScorer):
         answer = metadata["answer"]
 
         score, certainty = self.negative_scorer(prediction, answer)
+
         if score is not None:
             return score, certainty
 
         category = metadata["category"]
+        category = self.category_regex(category)
         distractors = metadata["distractors"]
         answer_index = metadata["answer_index"]
         words = distractors[:answer_index] + [answer] + distractors[answer_index:]
 
         score, certainty = self._simple_scorer_ru(prediction, answer)
+
         if score:
             return score, certainty
 
@@ -361,33 +98,6 @@ class LeastAssociatedWordScorerRu(LMentryScorer):
         score, certainty = self.certainty_scorer(prediction, base_patterns)
         return score, certainty
 
-    def get_punctuation(self, words_list):
-        words18 = ', '.join([word for word in words_list])
-        words17 = ', '.join(words_list[:-1]) + f' и {words_list[-1]}'
-        words16 = ', '.join(words_list[:-1]) + f', и {words_list[-1]}'
-        words15 = '(' + ', '.join([word for word in words_list]) + ')'
-        words13 = '(' + ', '.join(words_list[:-1]) + f' и {words_list[-1]}' + ')'
-        words11 = '(' + ', '.join(words_list[:-1]) + f', и {words_list[-1]}' + ')'
-        words14 = '[' + ', '.join([word for word in words_list]) + ']'
-        words12 = '[' + ', '.join(words_list[:-1]) + f' и {words_list[-1]}' + ']'
-        words10 = '[' + ', '.join(words_list[:-1]) + f', и {words_list[-1]}' + ']'
-        words9 = ', '.join([f'"{word}"' for word in words_list])
-        words8 = ', '.join([f'"{word}"' for word in words_list[:-1]]) + f' и "{words_list[-1]}"'
-        words7 = ', '.join([f'"{word}"' for word in words_list[:-1]]) + f', и "{words_list[-1]}"'
-        words6 = '(' + ', '.join(
-            [f'"{word}"' for word in words_list[:-1]]) + f' и "{words_list[-1]}"' + ')'
-        words5 = '[' + ', '.join(
-            [f'"{word}"' for word in words_list[:-1]]) + f' и "{words_list[-1]}"' + ']'
-        words4 = '(' + ', '.join([f'"{word}"' for word in words_list]) + ')'
-        words3 = '[' + ', '.join([f'"{word}"' for word in words_list]) + ']'
-        words2 = '(' + ', '.join(
-            [f'"{word}"' for word in words_list[:-1]]) + f', и "{words_list[-1]}"' + ')'
-        words1 = '[' + ', '.join(
-            [f'"{word}"' for word in words_list[:-1]]) + f', и "{words_list[-1]}"' + ']'
-
-        words = (rf'{words1}|{words2}|{words3}|{words4}|{words5}|{words6}|{words7}|{words8}|{words9}|{words10}|'
-                 rf'{words11}|{words12}|{words13}|{words14}|{words15}|{words16}|{words17}|{words18}')
-        return words
 
 if __name__ == "__main__":
     task_name = "least_associated_word_ru"
@@ -406,7 +116,28 @@ if __name__ == "__main__":
 
     scorer = LeastAssociatedWordScorerRu()
 
+    counter = 0
     for key in predictions_keys:
+        if counter > 0:
+            break
         examples_new = [ex for k, ex in examples.items() if k == key]
         pred = scorer.score_prediction(prediction=predictions[key]['prediction'], example=examples_new[0])
-        print(pred)
+        print("EXAMPLE:", examples_new[0]["input"], "ANSWER:", predictions[key]['prediction'], "ACC-CERT:", pred)
+        print()
+        counter += 1
+
+    prediction = """
+    да, все слова из списка относятся к категории "транспортные средства":
+
+    * "такси" - такси является транспортным средством.
+    * "сани" - "сани" может быть обозначением для саней, которые также являются транспортным средством.
+    * "трактор" - трактор является транспортным средством.
+    * "рябина" - "рябина" не является транспортным средством и не относится к этой категории.
+    * "автобус" - автобус является транспортным средством.
+
+    таким образом, все слова из списка относятся к категории "транспортные средства".
+    """
+
+    pattern = r"нет(,|.) категория (транспорты|транспортом|транспортов|транспортных средствах|транспортных средств|транспортными средствами|транспортным средством|транспортным средствам|транспортные средства|транспортному средству|транспортном средстве|транспортное средство|транспортного средства|транспорте|транспортах|транспортами|транспорта|транспорт) не включает слова (\"рябина\"|рябина)."
+
+    print("MATCH:", re.search(pattern, prediction))
