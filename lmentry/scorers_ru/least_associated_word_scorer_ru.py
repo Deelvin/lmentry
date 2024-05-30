@@ -18,12 +18,14 @@ class LeastAssociatedWordScorerRu(LMentryScorer):
         words = get_words(words)
         distractors = get_words(distractors)
 
+        category = self.category_regex(category)
+
         extra_patterns = get_extra_patterns(words, answer, distractors, category)
 
         base_patterns = [
-            rf"{answer}.",
-            rf"{answer},",
-            rf"^{answer}\b",
+            # rf"{answer}.",
+            # rf"{answer},",
+            rf"^{answer}\b"
         ]
 
         base_patterns.extend(extra_patterns)
@@ -32,33 +34,34 @@ class LeastAssociatedWordScorerRu(LMentryScorer):
 
     def category_regex(self, category):
         conj = r"(или|и)"
+        quote = r'("|)'
 
         if category == "этнонимы":
-            category = rf"(этнонимы|этнониму|этнонимом|этнонимов|этнониме|этнонимах|этнонимами|этнонимам|этнонима|этноним)"
+            category = rf"({quote}этнонимы{quote}|{quote}этнониму{quote}|{quote}этнонимом{quote}|{quote}этнонимов{quote}|{quote}этнониме{quote}|{quote}этнонимах{quote}|{quote}этнонимами{quote}|{quote}этнонимам{quote}|{quote}этнонима{quote}|{quote}этноним{quote})"
         elif category == "имена родства":
-            category = rf"(имя родства|имени родства|именем родства|именах родства|именами родства|именам родства|имена родства|имен родства)"
+            category = rf"({quote}имя родства{quote}|{quote}имени родства{quote}|{quote}именем родства{quote}|{quote}именах родства{quote}|{quote}именами родства{quote}|{quote}именам родства{quote}|{quote}имена родства{quote}|{quote}имен родства{quote})"
         elif category == "животные":
-            category = rf"(животных|животными|животным|животные|животному|животном|животное|животного|живых существах|живых существ|живыми существами|живым существом|живым существам|живые существа|живому существу|живом существе|живое существо|живого существа|живых организмов|живых организмах|живыми организмами|живым организмом|живым организмам|живые организмы|живому организму|живом организме|живой организм|живого организма)"
+            category = rf"({quote}животных{quote}|{quote}животными{quote}|{quote}животным{quote}|{quote}животные{quote}|{quote}животному{quote}|{quote}животном{quote}|{quote}животное{quote}|{quote}животного{quote}|{quote}живых существах{quote}|{quote}живых существ{quote}|{quote}живыми существами{quote}|{quote}живым существом{quote}|{quote}живым существам{quote}|{quote}живые существа{quote}|{quote}живому существу{quote}|{quote}живом существе{quote}|{quote}живое существо{quote}|{quote}живого существа{quote}|{quote}живых организмов{quote}|{quote}живых организмах{quote}|{quote}живыми организмами{quote}|{quote}живым организмом{quote}|{quote}живым организмам{quote}|{quote}живые организмы{quote}|{quote}живому организму{quote}|{quote}живом организме{quote}|{quote}живой организм{quote}|{quote}живого организма{quote})"
         elif category == "растения":
-            category = rf"(растениях|растениями|растениям|растения|растению|растений|растении|растением|растение)"
+            category = rf"({quote}растениях{quote}|{quote}растениями{quote}|{quote}растениям{quote}|{quote}растения{quote}|{quote}растению{quote}|{quote}растений{quote}|{quote}растении{quote}|{quote}растением{quote}|{quote}растение{quote})"
         elif category == "вещества и материалы":
-            category = rf"(материалы {conj} вещества|материалы|материалу {conj} веществу|материалу|материалом {conj} веществом|материалом|материалов {conj} веществ|материалов|материале {conj} веществе|материале|материалах {conj} веществах|материалах|материалами {conj} веществами|материалами|материалам {conj} веществам|материалам|материала {conj} вещества|материала|материал {conj} вещество|материал|веществу {conj} материалу|веществу|веществом {conj} материалом|веществом|вещество {conj} материал|вещество|веществе {conj} материале|веществе|веществах {conj} материалах|веществах|веществами {conj} материалами|веществами|веществам {conj} материалам|веществам|вещества {conj} материалы|вещества {conj} материала|вещества|веществ {conj} материалов|веществ)"
+            category = rf"({quote}материалы {conj} вещества{quote}|{quote}материалы{quote}|{quote}материалу {conj} веществу{quote}|{quote}материалу{quote}|{quote}материалом {conj} веществом{quote}|{quote}материалом{quote}|{quote}материалов {conj} веществ{quote}|{quote}материалов{quote}|{quote}материале {conj} веществе{quote}|{quote}материале{quote}|{quote}материалах {conj} веществах{quote}|{quote}материалах{quote}|{quote}материалами {conj} веществами{quote}|{quote}материалами{quote}|{quote}материалам {conj} веществам{quote}|{quote}материалам{quote}|{quote}материала {conj} вещества{quote}|{quote}материала{quote}|{quote}материал {conj} вещество{quote}|{quote}материал{quote}|{quote}веществу {conj} материалу{quote}|{quote}веществу{quote}|{quote}веществом {conj} материалом{quote}|{quote}веществом{quote}|{quote}вещество {conj} материал{quote}|{quote}вещество{quote}|{quote}веществе {conj} материале{quote}|{quote}веществе{quote}|{quote}веществах {conj} материалах{quote}|{quote}веществах{quote}|{quote}веществами {conj} материалами{quote}|{quote}веществами{quote}|{quote}веществам {conj} материалам{quote}|{quote}веществам{quote}|{quote}вещества {conj} материалы{quote}|{quote}вещества {conj} материала{quote}|{quote}вещества{quote}|{quote}веществ {conj} материалов{quote}|{quote}веществ{quote})"
         elif category == "здания и сооружения":
-            category = rf"(сооружениях {conj} зданиях|сооружениях|сооружениями {conj} зданиями|сооружениями|сооружениям {conj} зданиям|сооружениям|сооружения {conj} здания|сооружения|сооружению {conj} зданию|сооружению|сооружений {conj} зданий|сооружений|сооружении {conj} здании|сооружении|сооружением {conj} зданием|сооружением|сооружение {conj} здание|сооружение|зданиях {conj} сооружениях|зданиях|зданиями {conj} сооружениями|зданиями|зданиям {conj} сооружениям|зданиям|здания {conj} сооружения|здания|зданию {conj} сооружению|зданию|зданий {conj} сооружений|зданий|здании {conj} сооружении|здании|зданием {conj} сооружением|зданием|здание {conj} сооружение|здание)"
+            category = rf"({quote}сооружениях {conj} зданиях{quote}|{quote}сооружениях{quote}|{quote}сооружениями {conj} зданиями{quote}|{quote}сооружениями{quote}|{quote}сооружениям {conj} зданиям{quote}|{quote}сооружениям{quote}|{quote}сооружения {conj} здания{quote}|{quote}сооружения{quote}|{quote}сооружению {conj} зданию{quote}|{quote}сооружению{quote}|{quote}сооружений {conj} зданий{quote}|{quote}сооружений{quote}|{quote}сооружении {conj} здании{quote}|{quote}сооружении{quote}|{quote}сооружением {conj} зданием{quote}|{quote}сооружением{quote}|{quote}сооружение {conj} здание{quote}|{quote}сооружение{quote}|{quote}зданиях {conj} сооружениях{quote}|{quote}зданиях{quote}|{quote}зданиями {conj} сооружениями{quote}|{quote}зданиями{quote}|{quote}зданиям {conj} сооружениям{quote}|{quote}зданиям{quote}|{quote}здания {conj} сооружения{quote}|{quote}здания{quote}|{quote}зданию {conj} сооружению{quote}|{quote}зданию{quote}|{quote}зданий {conj} сооружений{quote}|{quote}зданий{quote}|{quote}здании {conj} сооружении{quote}|{quote}здании{quote}|{quote}зданием {conj} сооружением{quote}|{quote}зданием{quote}|{quote}здание {conj} сооружение{quote}|{quote}здание{quote})"
         elif category == "механизмы и приборы":
-            category = rf"(приборы {conj} механизмы|приборы|прибору {conj} механизму|прибору|прибором {conj} механизмом|прибором|приборов {conj} механизмов|приборов|приборе {conj} механизме|приборе|приборах {conj} механизмах|приборах|приборами {conj} механизмами|приборами|приборам {conj} механизмам|приборам|прибора {conj} механизма|прибора|прибор {conj} механизм|прибор|механизмы {conj} приборы|механизмы|механизму {conj} прибору|механизму|механизмом {conj} прибором|механизмом|механизмов {conj} приборов|механизмов|механизме {conj} приборе|механизме|механизмах {conj} приборах|механизмах|механизмами {conj} приборами|механизмами|механизмам {conj} приборам|механизмам|механизма {conj} прибора|механизма|механизм {conj} прибор|механизм)"
+            category = rf"({quote}приборы {conj} механизмы{quote}|{quote}приборы{quote}|{quote}прибору {conj} механизму{quote}|{quote}прибору{quote}|{quote}прибором {conj} механизмом{quote}|{quote}прибором{quote}|{quote}приборов {conj} механизмов{quote}|{quote}приборов{quote}|{quote}приборе {conj} механизме{quote}|{quote}приборе{quote}|{quote}приборах {conj} механизмах{quote}|{quote}приборах{quote}|{quote}приборами {conj} механизмами{quote}|{quote}приборами{quote}|{quote}приборам {conj} механизмам{quote}|{quote}приборам{quote}|{quote}прибора {conj} механизма{quote}|{quote}прибора{quote}|{quote}прибор {conj} механизм{quote}|{quote}прибор{quote}|{quote}механизмы {conj} приборы{quote}|{quote}механизмы{quote}|{quote}механизму {conj} прибору{quote}|{quote}механизму{quote}|{quote}механизмом {conj} прибором{quote}|{quote}механизмом{quote}|{quote}механизмов {conj} приборов{quote}|{quote}механизмов{quote}|{quote}механизме {conj} приборе{quote}|{quote}механизме{quote}|{quote}механизмах {conj} приборах{quote}|{quote}механизмах{quote}|{quote}механизмами {conj} приборами{quote}|{quote}механизмами{quote}|{quote}механизмам {conj} приборам{quote}|{quote}механизмам{quote}|{quote}механизма {conj} прибора{quote}|{quote}механизма{quote}|{quote}механизм {conj} прибор{quote}|{quote}механизм{quote})"
         elif category == "транспортные средства":
-            category = rf"(транспорты|транспортом|транспортов|транспортных средствах|транспортных средств|транспортными средствами|транспортным средством|транспортным средствам|транспортные средства|транспортному средству|транспортном средстве|транспортное средство|транспортного средства|транспорте|транспортах|транспортами|транспорта|транспорт)"
+            category = rf"({quote}транспорты{quote}|{quote}транспортом{quote}|{quote}транспортов{quote}|{quote}транспортных средствах{quote}|{quote}транспортных средств{quote}|{quote}транспортными средствами{quote}|{quote}транспортным средством{quote}|{quote}транспортным средствам{quote}|{quote}транспортные средства{quote}|{quote}транспортному средству{quote}|{quote}транспортном средстве{quote}|{quote}транспортное средство{quote}|{quote}транспортного средства{quote}|{quote}транспорте{quote}|{quote}транспортах{quote}|{quote}транспортами{quote}|{quote}транспорта{quote}|{quote}транспорт{quote})"
         elif category == "мебель":
-            category = rf"(мебелях|мебелями|мебелям|мебелью|мебель|мебели|мебелей)"
+            category = rf"({quote}мебелях{quote}|{quote}мебелями{quote}|{quote}мебелям{quote}|{quote}мебелью{quote}|{quote}мебель{quote}|{quote}мебели{quote}|{quote}мебелей{quote})"
         elif category == "посуда":
-            category = rf"(посуды|посуду|посудой|посуде|посудах|посудами|посудам|посуда|посуд)"
+            category = rf"({quote}посуды{quote}|{quote}посуду{quote}|{quote}посудой{quote}|{quote}посуде{quote}|{quote}посудах{quote}|{quote}посудами{quote}|{quote}посудам{quote}|{quote}посуда{quote}|{quote}посуд{quote})"
         elif category == "одежда и обувь":
-            category = rf"(одежды {conj} обувь|одежды {conj} обуви|одежды|одежду {conj} обувь|одежду|одеждой {conj} обувью|одеждой|одежде {conj} обуви|одежде|одеждах {conj} обуви|одеждах|одеждами {conj} обувью|одеждами|одеждам {conj} обуви|одеждам|одежда {conj} обувь|одежда|одежд {conj} обуви|одежд|обувью {conj} одеждой|обувью {conj} одеждами|обувью|обувь {conj} одежды|обувь {conj} одежду|обувь {conj} одежда|обувь|обуви {conj} одежды|обуви {conj} одежде|обуви {conj} одеждах|обуви {conj} одеждам|обуви {conj} одежд|обуви)"
+            category = rf"({quote}одежды {conj} обувь{quote}|{quote}одежды {conj} обуви{quote}|{quote}одежды{quote}|{quote}одежду {conj} обувь{quote}|{quote}одежду{quote}|{quote}одеждой {conj} обувью{quote}|{quote}одеждой{quote}|{quote}одежде {conj} обуви{quote}|{quote}одежде{quote}|{quote}одеждах {conj} обуви{quote}|{quote}одеждах{quote}|{quote}одеждами {conj} обувью{quote}|{quote}одеждами{quote}|{quote}одеждам {conj} обуви{quote}|{quote}одеждам{quote}|{quote}одежда {conj} обувь{quote}|{quote}одежда{quote}|{quote}одежд {conj} обуви{quote}|{quote}одежд{quote}|{quote}обувью {conj} одеждой{quote}|{quote}обувью {conj} одеждами{quote}|{quote}обувью{quote}|{quote}обувь {conj} одежды{quote}|{quote}обувь {conj} одежду{quote}|{quote}обувь {conj} одежда{quote}|{quote}обувь{quote}|{quote}обуви {conj} одежды{quote}|{quote}обуви {conj} одежде{quote}|{quote}обуви {conj} одеждах{quote}|{quote}обуви {conj} одеждам{quote}|{quote}обуви {conj} одежд{quote}|{quote}обуви{quote})"
         elif category == "еда и напитки":
-            category = rf"(напиток {conj} еду|напиток {conj} еда|напиток|напитку {conj} еде|напитку|напитком {conj} едой|напитком|напитков {conj} еды|напитков|напитки {conj} еду|напитки {conj} еда|напитки|напитке {conj} еде|напитке|напитках {conj} еде|напитках|напитками {conj} едой|напитками|напиткам {conj} еде|напиткам|напитка {conj} еды|напитка|еды {conj} напитков|еды {conj} напитка|еды|еду {conj} напиток|еду {conj} напитки|еду|едой {conj} напитком|едой {conj} напитками|едой|еде {conj} напитку|еде {conj} напитке|еде {conj} напитках|еде {conj} напиткам|еде|еда {conj} напиток|еда {conj} напитки|еда)"
+            category = rf"({quote}напиток {conj} еду{quote}|{quote}напиток {conj} еда{quote}|{quote}напиток{quote}|{quote}напитку {conj} еде{quote}|{quote}напитку{quote}|{quote}напитком {conj} едой{quote}|{quote}напитком{quote}|{quote}напитков {conj} еды{quote}|{quote}напитков{quote}|{quote}напитки {conj} еду{quote}|{quote}напитки {conj} еда{quote}|{quote}напитки{quote}|{quote}напитке {conj} еде{quote}|{quote}напитке{quote}|{quote}напитках {conj} еде{quote}|{quote}напитках{quote}|{quote}напитками {conj} едой{quote}|{quote}напитками{quote}|{quote}напиткам {conj} еде{quote}|{quote}напиткам{quote}|{quote}напитка {conj} еды{quote}|{quote}напитка{quote}|{quote}еды {conj} напитков{quote}|{quote}еды {conj} напитка{quote}|{quote}еды{quote}|{quote}еду {conj} напиток{quote}|{quote}еду {conj} напитки{quote}|{quote}еду{quote}|{quote}едой {conj} напитком{quote}|{quote}едой {conj} напитками{quote}|{quote}едой{quote}|{quote}еде {conj} напитку{quote}|{quote}еде {conj} напитке{quote}|{quote}еде {conj} напитках{quote}|{quote}еде {conj} напиткам{quote}|{quote}еде{quote}|{quote}еда {conj} напиток{quote}|{quote}еда {conj} напитки{quote}|{quote}еда{quote})"
         elif category == "тексты":
-            category = rf"(текстовых документов|текстовых материалов|тексты|тексту|текстом|текстов|тексте|текстах|текстами|текстам|текста|текст)"
+            category = rf"({quote}текстовых документов{quote}|{quote}текстовых материалов{quote}|{quote}тексты{quote}|{quote}тексту{quote}|{quote}текстом{quote}|{quote}текстов{quote}|{quote}тексте{quote}|{quote}текстах{quote}|{quote}текстами{quote}|{quote}текстам{quote}|{quote}текста{quote}|{quote}текст{quote})"
 
         return category
 
@@ -90,8 +93,8 @@ class LeastAssociatedWordScorerRu(LMentryScorer):
 
         score, certainty = self._simple_scorer_ru(prediction, answer)
 
-        if score:
-            return score, certainty
+        if score is not None:
+          return score, certainty
 
         base_patterns = self.get_base_patterns(answer, category, words, distractors)
 
@@ -116,28 +119,16 @@ if __name__ == "__main__":
 
     scorer = LeastAssociatedWordScorerRu()
 
-    counter = 0
+    result = {}
+
     for key in predictions_keys:
-        if counter > 0:
-            break
         examples_new = [ex for k, ex in examples.items() if k == key]
         pred = scorer.score_prediction(prediction=predictions[key]['prediction'], example=examples_new[0])
-        print("EXAMPLE:", examples_new[0]["input"], "ANSWER:", predictions[key]['prediction'], "ACC-CERT:", pred)
-        print()
-        counter += 1
+        result[key] = {"input": examples_new[0]["input"],
+                       "prediction": predictions[key]['prediction'],
+                       "score": pred[0],
+                       "certainty": pred[1]}
 
-    prediction = """
-    да, все слова из списка относятся к категории "транспортные средства":
-
-    * "такси" - такси является транспортным средством.
-    * "сани" - "сани" может быть обозначением для саней, которые также являются транспортным средством.
-    * "трактор" - трактор является транспортным средством.
-    * "рябина" - "рябина" не является транспортным средством и не относится к этой категории.
-    * "автобус" - автобус является транспортным средством.
-
-    таким образом, все слова из списка относятся к категории "транспортные средства".
-    """
-
-    pattern = r"нет(,|.) категория (транспорты|транспортом|транспортов|транспортных средствах|транспортных средств|транспортными средствами|транспортным средством|транспортным средствам|транспортные средства|транспортному средству|транспортном средстве|транспортное средство|транспортного средства|транспорте|транспортах|транспортами|транспорта|транспорт) не включает слова (\"рябина\"|рябина)."
-
-    print("MATCH:", re.search(pattern, prediction))
+    with open(Path(__file__).parent.parent.parent / "predictions" / task_name / "result_most.json", "w",
+              encoding='utf8') as outfile:
+        json.dump(result, outfile, ensure_ascii=False, indent=4)

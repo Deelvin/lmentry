@@ -17,7 +17,7 @@ class SentenceNotContainingRu(LMentryTaskRu):
         self.third_template = 'Напишите предложение, не содержащее слово "{word}":\n'
         self.fourth_template = 'Напишите предложение, в котором отсутствует слово "{word}":\n'
         self.fifth_template = 'Напишите предложение без слова "{word}":\n'
-        self.sixth_template = 'Напишите предложение, исключая слова "{word}":\n'
+        self.sixth_template = 'Напишите предложение, исключая слово "{word}":\n'
         self.all_templates = [self.canonical_template, self.second_template, self.third_template,
                               self.fourth_template, self.fifth_template, self.sixth_template]
 
