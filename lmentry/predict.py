@@ -69,7 +69,7 @@ class PredictorBase():
       predictions_data[id_] = {"input": input_, "prediction": prediction}
 
     with open(output_path, "w") as f_predictions:
-      json.dump(predictions_data, f_predictions, indent=2)
+      json.dump(predictions_data, f_predictions, indent=2, ensure_ascii=False)
 
   def generate(
     self,

@@ -128,10 +128,14 @@ class LMentryScorer:
     @staticmethod
     def get_shared_patterns_ru(target):
 
+        delimiter = r"(:|-)"
+
         patterns = [
-            rf"Ответ {target}",
-            rf"Правильный ответ {target}",
-            rf"Ответ: {target}"
+            rf"Ответ{delimiter} {target}",
+            rf"Правильный ответ{delimiter} {target}",
+            rf"Конечно! Вот ответ на ваш вопрос{delimiter} {target}",
+            rf"Спасибо за вопрос!\n{target}",
+            rf"С удовольствием!\n{target}"
         ]
         return [p.format(target=target) for p in patterns]
 
@@ -195,7 +199,10 @@ class LMentryScorer:
         score, certainty = None, None
 
         # return certain 0 if the prediction contains no alphanumeric character
-        if not re.search(r"[^\W_]", prediction):  # we don't consider `_` to be alphanumeric
+        if not re.search(r"[а-яёА-ЯЁ0-9_]", prediction):  # we don't consider `_` to be alphanumeric
+            return 0, 1
+
+        if re.search(r"[a-zA-Z]", prediction):  # we don't want to have Latin symbols
             return 0, 1
 
         if re.match(rf"{answer}\.?$", prediction, flags=re.IGNORECASE):
@@ -211,11 +218,35 @@ class LMentryScorer:
 
         return score, certainty
 
+    def _simple_scorer_ru(self, prediction, answer, allow_answer_pattern_repetitions=True) -> tuple[int, int]:
+
+        score, certainty = None, None
+        # return certain 0 if the prediction contains no alphanumeric character
+        if not re.search(r"[а-яёА-ЯЁ0-9_]", prediction):  # we don't consider `_` to be alphanumeric
+            return 0, 1
+
+        if re.search(r"[a-zA-Z]", prediction):  # we don't want to have Latin symbols
+            return 0, 1
+
+        if re.match(rf"{answer}\.?$", prediction, flags=re.IGNORECASE):
+            score = 1
+            certainty = 1
+
+        if allow_answer_pattern_repetitions:
+            alphanumeric_pattern = r"\b[а-я\d]+\b"
+            all_alphanumeric_words = re.findall(alphanumeric_pattern, prediction)
+            if all([re.match(answer + "$", word) for word in all_alphanumeric_words]):
+                score = 1
+                certainty = 1
+
+        return score, certainty
+
     def certainty_scorer(self, prediction, base_patterns):
         score, certainty = 0, 0
 
-        for i, pattern in enumerate(self.get_patterns(base_patterns)):
+        for i, pattern in enumerate(base_patterns):
             pattern = self.normalize_string(pattern)
+
             if re.match(pattern + r"\.?$", prediction):
                 score = 1
                 certainty = 1

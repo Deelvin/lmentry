@@ -2,7 +2,11 @@ import json
 import logging
 
 from lmentry.constants import (
-    TASKS_DATA_DIR, PREDICTIONS_ROOT_DIR, models_that_cant_stop_generating, lmentry_random_seed
+    TASKS_DATA_DIR,
+    TASKS_DATA_RU_DIR,
+    PREDICTIONS_ROOT_DIR,
+    models_that_cant_stop_generating,
+    lmentry_random_seed,
 )
 from lmentry.scorers.scorer import LMentryScorer
 
@@ -46,8 +50,8 @@ class LMentryTask:
 
     def save_task_data(self, task_data, task_data_path):
         task_data_path = task_data_path or self.default_data_path
-        with open(task_data_path, "w") as f:
-            json.dump(task_data, f, indent=2)
+        with open(task_data_path, "w", encoding="utf8") as f:
+            json.dump(task_data, f, indent=2, ensure_ascii=False)
 
     def score_predictions(self, model_name, forced_scoring: bool = False):
         logging.info(f"starting to score {self.name} predictions for {model_name}")
@@ -66,3 +70,9 @@ class LMentryTask:
                                  forced_scoring=forced_scoring,
                                  )
         logging.info(f"finished scoring {self.name} predictions for {model_name}")
+
+
+class LMentryTaskRu(LMentryTask):
+    def __init__(self, name):
+        super().__init__(name)
+        self.default_data_path = TASKS_DATA_RU_DIR.joinpath(f"{self.name}.json")

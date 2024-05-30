@@ -6,15 +6,19 @@ DEFAULT_MAX_LENGTH = 70
 
 ROOT_DIR = Path(__file__).parent.parent
 TASKS_DATA_DIR = ROOT_DIR.joinpath("data")
+TASKS_DATA_RU_DIR = ROOT_DIR.joinpath("data_ru")
 HF_TASKS_DATA_DIR = ROOT_DIR.joinpath("hf_data")
 PREDICTIONS_ROOT_DIR = ROOT_DIR.joinpath("predictions")
 RESULTS_DIR = ROOT_DIR.joinpath("results")
 VISUALIZATIONS_DIR = RESULTS_DIR.joinpath("visualizations")
 SCORER_EVALUATION_DIR = RESULTS_DIR.joinpath("scorer_evaluation")
 RESOURCES_DIR = ROOT_DIR.joinpath("resources")
+RESOURCES_RU_DIR = ROOT_DIR.joinpath("resources_ru")
 LMENTRY_WORDS_PATH = RESOURCES_DIR.joinpath("lmentry_words.json")
+LMENTRY_WORDS_RU_PATH = RESOURCES_RU_DIR.joinpath("lmentry_words_ru.json")
 RHYME_GROUPS_PATH = RESOURCES_DIR.joinpath("rhyme_groups.json")
 HOMOPHONES_PATH = RESOURCES_DIR.joinpath("homophones.csv")
+HOMOPHONES_RU_PATH = RESOURCES_RU_DIR.joinpath("homophones_ru.json")
 PHONETICALLY_UNAMBIGUOUS_WORDS_PATH = RESOURCES_DIR.joinpath("phonetically_unambiguous_words.json")
 
 
